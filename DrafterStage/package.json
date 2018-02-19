@@ -1,0 +1,36 @@
+{
+  "name": "drafter_stage",
+  "version": "1.0.0",
+  "description": "The front end for drafter",
+  "main": "index.js",
+  "scripts": {
+    "build:dev": "webpack --config webpack.config.dev.js",
+    "build:deploy": "webpack --config webpack.config.deploy.js",
+    "server": "webpack-dev-server --open --config webpack.config.dev.js"
+  },
+  "author": "LZephyr",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "css-loader": "^0.28.8",
+    "html-webpack-plugin": "^2.30.1",
+    "style-loader": "^0.19.1",
+    "uglifyjs-webpack-plugin": "^1.1.6",
+    "vue-loader": "^13.6.2",
+    "vue-template-compiler": "^2.5.13",
+    "webpack": "^3.10.0",
+    "webpack-dev-server": "^2.9.7",
+    "webpack-merge": "^4.1.1"
+  },
+  "dependencies": {
+    "blueimp-md5": "^2.10.0",
+    "crypto-js": "^3.1.9-1",
+    "svg-pan-zoom": "^3.5.3",
+    "viz.js": "^1.8.0",
+    "vue": "^2.5.13"
+  }
+}
