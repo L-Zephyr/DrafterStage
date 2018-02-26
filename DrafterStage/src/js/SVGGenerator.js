@@ -93,6 +93,10 @@ class DotGenerator {
 
     // 添加节点，参数为String类型
     addNode(text, id) {
+        text = text.replace('>', '\\>')
+        text = text.replace('<', '\\<')
+        text = text.replace('->', '\\-\\>')
+
         let nodeId = 'node_' + id
         if (this.nodes.has(nodeId)) {
             return

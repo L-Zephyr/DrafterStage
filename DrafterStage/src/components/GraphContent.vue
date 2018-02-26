@@ -20,7 +20,6 @@
 <script>
     import * as SVGGenerator from '../js/SVGGenerator.js'
     import * as Global from '../js/Global.js'
-    import PanZoomSvg from 'svg-pan-zoom'
     import {
         SVGHandler,
         SVGLine,
@@ -29,6 +28,7 @@
     } from '../js/SVGHandler'
 
     /* 选中事件: nodeSelected(SVGNode), 未选中任何节点则为null */
+
     export default {
         props: ["currentClass", "selfOnly"], // 当前指定的类名，只显示内部的方法
 
@@ -36,8 +36,6 @@
             return {
                 graph: "<div/>",
                 // svg: new SVGHandler(),
-                panZoomSvg: undefined,
-                currentScale: 1, // 当前缩放比例
                 isNodeSelected: false, // 是否选中节点
             }
         },
@@ -93,12 +91,13 @@
 
             // 点击放大
             onScaleUp() {
-                this.panZoomSvg.zoomBy(this.currentScale + 0.2)
+                Handler.zoomBy(1.2)
             },
 
             // 点击缩小
+
             onScaleDown() {
-                this.panZoomSvg.zoomBy(this.currentScale - 0.2)
+                Handler.zoomBy(0.8)
             },
 
             // 选中节点, SVGNode
@@ -119,47 +118,12 @@
                         selfOnly: this.selfOnly,
                     })
                     setTimeout(() => {
-                        let root = this.$el.querySelector('svg')
-                        // root.setAttribute('width', '100%')
-                        root.setAttribute('height', '100%')
-                        // root.setAttribute('style', '{overflow: auto;}')
-
-                        // 缩放SVG
-                        this.panZoomSvg = PanZoomSvg(root, {
-                            fit: false,
-                            zoomScaleSensitivity: 0.4,
-                            dblClickZoomEnabled: false,
-                            mouseWheelZoomEnabled: false,
-                            contain: false,
-                            preventMouseEventsDefault: false,
-                            center: false,
-                            beforePan: this.beforePan,
-                        })
-                        
-                        // 注册事件
+                        // 更新SVG事件
                         Handler.update(this.$el, clsId)
                     }, 0);
                 } else {
                     throw "未找到类型:" + this.currentClass + " !!, 数据有误" 
                 }
-            },
-
-            // 控制可拖动区域
-            beforePan(oldPan, newPan) {
-                var stopHorizontal = false
-                    , stopVertical = false
-                    , gutterWidth = 100
-                    , gutterHeight = 100
-                    // Computed variables
-                    , sizes = this.panZoomSvg.getSizes()
-                    , leftLimit = -((sizes.viewBox.x + sizes.viewBox.width) * sizes.realZoom) + gutterWidth
-                    , rightLimit = sizes.width - gutterWidth - (sizes.viewBox.x * sizes.realZoom)
-                    , topLimit = -((sizes.viewBox.y + sizes.viewBox.height) * sizes.realZoom) + gutterHeight
-                    , bottomLimit = sizes.height - gutterHeight - (sizes.viewBox.y * sizes.realZoom)
-                let customPan = {}
-                customPan.x = Math.max(leftLimit, Math.min(rightLimit, newPan.x))
-                customPan.y = Math.max(topLimit, Math.min(bottomLimit, newPan.y))
-                return customPan
             },
         }
     }

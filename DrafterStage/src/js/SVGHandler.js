@@ -1,3 +1,4 @@
+import PanZoomSvg from 'svg-pan-zoom'
 
 // SVG数据
 let SVGData = {
@@ -16,6 +17,7 @@ const elementById = (id) => {
 class SVGHandler {
     constructor() {
         this.onClickNode = undefined; // 响应点击事件, 外部传入，回调参数：SVGNode
+        this.panZoomSvg = undefined
     }
 
     // 更新SVG数据, 传入SVG的根节点和Class的id
@@ -47,7 +49,7 @@ class SVGHandler {
             }
         }
 
-        // 查找所有节点
+        // 查找所有连线
         SVGData.lines = {}
         let svgLines = root.querySelectorAll('g[id^="line_"]')
         for (let svgLine of svgLines) {
@@ -56,6 +58,18 @@ class SVGHandler {
             let [fromId, toId] = ['node_' + compentents[1], 'node_' + compentents[2]]
             SVGData.lines[lineId] = new SVGLine(lineId, fromId, toId)
         }
+
+        // 缩放SVG
+        this.panZoomSvg = PanZoomSvg(SVGData.svgRoot, {
+            fit: false,
+            zoomScaleSensitivity: 0.4,
+            dblClickZoomEnabled: false,
+            mouseWheelZoomEnabled: false,
+            contain: false,
+            preventMouseEventsDefault: false,
+            center: true,
+            panEnabled: false,
+        })
     }
 
     // 全部取消选中
@@ -83,6 +97,24 @@ class SVGHandler {
         console.log('移动到节点 ' + node)
 
         // TODO: 将SVG的中心移动到选择的节点上
+        let element = elementById('node_' + id)
+
+        let leftOffset = element.getBoundingClientRect().left + document.documentElement.scrollLeft
+        let topOffset = element.getBoundingClientRect().top + document.documentElement.scrollTop
+        
+        let elementWidth = element.getBoundingClientRect().width
+        let elementHeight = element.getBoundingClientRect().height
+        // 将element滚动到可见范围
+        window.scrollTo(leftOffset - document.documentElement.clientWidth / 2 - elementWidth / 2, 
+                        topOffset - document.documentElement.clientHeight / 2 - elementHeight / 2)
+    }
+
+    // 放大不能超过原始尺寸
+    zoomBy(scale) {
+        if (this.panZoomSvg.getZoom() * scale > 1) {
+            scale = 1
+        }
+        this.panZoomSvg.zoomBy(scale)
     }
 }
 

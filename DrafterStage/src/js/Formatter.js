@@ -22,7 +22,7 @@
 */
 const formateMethod = (method) => {
     let formated = ""
-    if (method.isSwift) { // Swift
+    if (method.isSwift) { // Swift方法
         if (method.static) {
             formated += 'static '
         }
@@ -36,8 +36,8 @@ const formateMethod = (method) => {
         formated += paramStr
 
         formated += ')'                         // )
-        formated += '->' + method.returnType    // -> type    
-    } else { // Objective-C
+        // formated += '->' + method.returnType    // -> type    
+    } else { // Objective-C方法
         if (method.static) {
             formated += '+'
         } else {
