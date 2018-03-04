@@ -84,7 +84,7 @@ class DotGenerator {
     }
 
     begin() {
-        this.dot += "digraph { node[style=filled,fillcolor=white,shape=record];"
+        this.dot += "digraph { bgcolor=\"transparent\";node[style=\"filled\",fillcolor=\"transparent\",fill=\"transparent\",shape=\"record\"];"
     }
 
     end() {

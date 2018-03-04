@@ -31,7 +31,7 @@ const formateMethod = (method) => {
         formated += '('                     // (
 
         let paramStr = method.params.map((param) => {
-            return param.sel + ' ' + param.name + ' :'
+            return param.sel + ' :'
         }).join(", ")
         formated += paramStr
 

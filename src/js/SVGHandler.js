@@ -59,6 +59,11 @@ class SVGHandler {
             SVGData.lines[lineId] = new SVGLine(lineId, fromId, toId)
         }
 
+        // 设置高度和背景色
+        if (SVGData.svgRoot.getBoundingClientRect().height < document.documentElement.clientHeight) {
+            SVGData.svgRoot.setAttribute('height', document.documentElement.clientHeight)
+        }
+
         // 缩放SVG
         this.panZoomSvg = PanZoomSvg(SVGData.svgRoot, {
             fit: false,

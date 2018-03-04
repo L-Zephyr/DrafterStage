@@ -2,20 +2,31 @@
     <div :class="panelClass" class="detail-panel-hidden">
         <ul class="detail-list">
             <li><p class="title">Class</p></li>
-            <li><p>{{className}}</p></li>
+            <li><p class="class-name">{{className}}</p></li>
 
             <li><p class="title">Parameters</p></li>
+            <li v-if="parameters.length == 0" class="unable">None</li>
             <li 
                 v-for="param in parameters"
                 :key="param.id"
-            >Name: {{param.name}}  Type: {{param.type}}</li>
+            >
+                <div class="param-item">
+                    <span class="param-tag">TYPE:</span> {{param.type}} <br>
+                    <span class="param-tag">NAME:</span> {{param.name}} 
+                </div>
+            </li>
 
             <li><p class="title">Invokes</p></li>
+            <li v-if="invokes.length == 0" class="unable">None</li>
             <li
                 v-for="invoke in invokes"
                 :key="invoke.id"
                 @click="clickInvokeMethod(invoke)"
-            >{{invoke.name}}</li>
+            >
+                <div class="invoke-item">
+                    {{invoke.name}}
+                </div>
+            </li>
         </ul>
     </div>
 </template>
@@ -99,10 +110,12 @@ export default {
             let params = new Array()
             for (let key in this.methodData.params) {
                 let param = this.methodData.params[key]
-                params.push({
-                    name: param.sel,
-                    type: param.type
-                })
+                if (param.sel && param.type) {
+                    params.push({
+                        name: param.sel,
+                        type: param.type
+                    })
+                }
             }
             return params
         },
@@ -142,8 +155,14 @@ export default {
 
 <style scoped>
 
+* {
+    font-family: Menlo, Monaco, 'Courier New', monospace;
+}
+
 .detail-panel-hidden {
-    background-color: antiquewhite;
+    border-left: 1px solid #d6e0e8;
+    background-color: white;
+    overflow-y: auto;
     width: 300px;
     position: fixed;
     top: 0px;
@@ -160,20 +179,58 @@ export default {
 }
 
 .detail-list {
-    padding-top: 200px;
-}
-
-ul {
+    padding: 50px 15px 0 15px;
     list-style: none;
-    padding-top: 20px;
     vertical-align: top;
-    overflow: auto;
-    width: 100%;
+    width: 250px;
     height: 100%;
 }
 
 .title {
-    color: red;
+    color: black;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.unable {
+    color: #bebebe;
+}
+
+.class-name {
+    color: #3F6E74;
+}
+
+.param-item {
+    border-radius: 5px;
+    background-color: #d6e0e8;
+    padding: 5px 5px 5px 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    word-break: break-all;
+}
+
+.param-tag {
+    background-color: #94aec6;
+    border-radius: 5px;
+    color: white;
+    font-family: Courier, monospace;
+    border-radius: 2px;
+    padding: 0px 5px 0px 5px;
+}
+
+.invoke-item {
+    background-color: #d6e0e8;
+    border: 1px solid #d6e0e8;
+    padding: 5px 5px 5px 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    word-break: break-all;
+    cursor: pointer;
+}
+
+.invoke-item:hover {
+    border: 1px solid #94aec6;
 }
 
 </style>

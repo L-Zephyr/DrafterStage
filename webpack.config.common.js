@@ -29,6 +29,10 @@ module.exports = {
                 use: "vue-loader"
             },
             {
+                test: /\.(png|jpg)$/,
+                use: "url-loader",
+            },
+            {
                 test: /(\.js)$/, 
                 use: {
                     loader: "babel-loader", 

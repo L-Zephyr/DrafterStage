@@ -1,10 +1,10 @@
 <template>
     <div class="container" id="app">
-        <left-panel 
+        <list-panel 
             :datas="root" 
             @onSelectedChange="selectedChange"
             @onSelfOnlyChange="onSelfOnlyChange">
-        </left-panel>
+        </list-panel>
         <graph-content 
             :current-class="currentClass" 
             :self-only="selfOnly" 
@@ -18,14 +18,14 @@
 </template>
 
 <script>
-    import LeftPanel from './components/LeftPanel.vue'
+    import ListPanel from './components/ListPanel.vue'
     import GraphContent from './components/GraphContent.vue'
     import DetailPanel from './components/DetailPanel.vue'
     import * as Global from './js/Global.js'
 
     export default {
         components: {
-            LeftPanel,
+            ListPanel,
             GraphContent,
             DetailPanel,
         },
@@ -85,6 +85,7 @@
 
 html {
     height: 100%;
+    background-color: #f5f6f7;
 }
 
 body {

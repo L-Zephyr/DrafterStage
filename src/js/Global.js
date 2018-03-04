@@ -3,7 +3,7 @@ const ClassMap = (() => {
     let map = {}
     for (let clsItem of DrafterData) {
         // 忽略掉没有方法的class
-        if (clsItem.methods.length == 0) {
+        if (Object.getOwnPropertyNames(clsItem.methods).length == 0) {
             continue
         }
 

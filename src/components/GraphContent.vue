@@ -130,44 +130,52 @@
 </script>
 
 <style scoped>
-    .graph-content {
-        margin-left: 300px;
-        padding-right: 0px;
-    }
+.graph-content {
+    margin-left: 300px;
+    padding-right: 0px;
+}
 
-    .content-right {
-        padding-right: 300px;
-    }
+svg, svg * {
+    background-color: transparent;
+}
 
-    #SvgContainer {
-        width: 100%;
-        height: 100%;
-    }
+.content-right {
+    padding-right: 300px;
+}
 
-    div {
-        width: 100%;
-        height: 100%;
-    }
+#SvgContainer {
+    width: 100%;
+    height: 100%;
+}
 
-    .scale-up {
-        position: fixed;
-        right: 50px;
-        bottom: 100px;
-        width: 40px;
-        height: 40px;
-        background-color: aquamarine;
-    }
+div {
+    width: 100%;
+    height: 100%;
+}
 
-    .scale-down {
-        position: fixed;
-        right: 50px;
-        bottom: 40px;
-        width: 40px;
-        height: 40px;
-        background-color: rgb(144, 185, 172);
-    }
+.scale-up {
+    position: fixed;
+    border-radius: 2px;
+    right: 20px;
+    bottom: 85px;
+    width: 40px;
+    height: 36px;
+    background: url(../img/scale_up.png) no-repeat center;
+    background-color: rgba(0,0,0,0.6);
+}
 
-    .button-right-padding {
-        right: 350px;
-    }
+.scale-down {
+    position: fixed;
+    border-radius: 2px;
+    right: 20px;
+    bottom: 40px;
+    width: 40px;
+    height: 36px;
+    background: url(../img/scale_down.png) no-repeat center;
+    background-color: rgba(0,0,0,0.6);
+}
+
+.button-right-padding {
+    right: 350px;
+}
 </style>
