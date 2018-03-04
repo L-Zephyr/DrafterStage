@@ -10,7 +10,7 @@ module.exports = merge(common, {
             title: 'Drafter Stage',
             template: 'index.html'
         }),
-        // new UglifyJsPlugin(),
+        new UglifyJsPlugin(),
         new DeployResourcePlugin(),
     ]
 })

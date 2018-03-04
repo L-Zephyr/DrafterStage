@@ -2,9 +2,7 @@ const fs = require('fs')
 const os = require('os')
 const path = require('path')
 
-function DeployResourcePlugin(options) {
 
-}
 
 function copyFile(from, to) {
     fs.createReadStream(from).pipe(fs.createWriteStream(to))
@@ -30,7 +28,11 @@ function rmdir(dir) {
     fs.rmdirSync(dir);
 };
 
-// 编译完成后将结果文件拷贝到 ~/.drafter 文件夹中
+// 该插件在编译完成后将结果文件拷贝到 ~/.drafter 文件夹中
+function DeployResourcePlugin(options) {
+
+}
+
 DeployResourcePlugin.prototype.apply = function (compiler) {
     compiler.plugin('after-emit', function (compilation, callback) {
         let bundlePath = './public/bundle.js'
