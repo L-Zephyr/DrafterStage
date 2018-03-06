@@ -20,6 +20,10 @@ const DefaultOptions = {
 // 合并选项
 const mergeOptions = (options) => {
     let opts = options
+    if (opts === undefined) {
+        opts = DefaultOptions
+    }
+
     if (opts.selfOnly === undefined) opts.selfOnly = DefaultOptions.selfOnly
     if (opts.keywords === undefined) opts.keywords = DefaultOptions.keywords
     if (opts.caseSensitive === undefined) opts.caseSensitive = DefaultOptions.caseSensitive
@@ -83,8 +87,8 @@ class DotGenerator {
         throw TypeError("Shoule be implement at subclass!")
     }
 
-    begin() {
-        this.dot += "digraph { bgcolor=\"transparent\";node[style=\"filled\",fillcolor=\"transparent\",fill=\"transparent\",shape=\"record\"];"
+    begin(name = "") {
+        this.dot += "digraph " + name + " { bgcolor=\"transparent\";node[style=\"filled\",fillcolor=\"transparent\",fill=\"transparent\",shape=\"record\"];"
     }
 
     end() {
@@ -93,9 +97,9 @@ class DotGenerator {
 
     // 添加节点，参数为String类型
     addNode(text, id) {
-        text = text.replace('>', '\\>')
-        text = text.replace('<', '\\<')
-        text = text.replace('->', '\\-\\>')
+        text = text.replace(new RegExp('>', 'g'), '\\>')
+        text = text.replace(new RegExp('<', 'g'), '\\<')
+        text = text.replace(new RegExp('->', 'g'), '\\-\\>')
 
         let nodeId = 'node_' + id
         if (this.nodes.has(nodeId)) {
@@ -106,18 +110,18 @@ class DotGenerator {
     }
 
     // 添加连线，参数为method的对象
-    link(fromId, toId) {
+    link(fromId, toId, style="") {
         // 只能连接存在的节点
         if (!this.hasNode(fromId) || !this.hasNode(toId)) {
             return
         }
 
         let line = 'line_' + fromId + '_' + toId
-        if (this.lines.has(line)) {
+        if (this.lines.has(line)) { // 不能重复添加连线
             return
         }
         this.lines.add(line)
-        this.dot += fromId + '->' + toId + '[id="' + line + '"];'
+        this.dot += `${fromId}->${toId}[id="${line}",${style}]`
     }
 }
 
@@ -129,7 +133,7 @@ class CallGraphGenerator extends DotGenerator {
     }
 
     generate() {
-        this.begin()
+        this.begin("CallGraph")
         // 添加节点
         for (let methodKey in this.methods) {
             let method = this.methods[methodKey]
@@ -196,9 +200,34 @@ class InheritGraphGenerator extends DotGenerator {
     }
 
     generate() {
-        this.begin()
+        this.begin("inheritance")
+
+        for (let key in this.classList) {
+            let cls = this.classList[key]
+            if (cls.type == "class") {
+                // 添加class节点
+                let nodeId = "cls" + MD5(cls.name)
+                this.addNode(cls.name, nodeId)  // 用md5加上cls标识作为id
+
+                // 添加protocol节点和连线
+                for (let proKey in cls.protocols) {
+                    let protocol = cls.protocols[proKey]
+                    let protoId = "pro" + MD5(protocol.name)
+                    this.addNode("<<protocol>>\\n" + protocol.name, protoId)
+                    this.link(nodeId, protoId, "arrowhead=empty style=dashed")
+                }
+
+                // 添加superClass节点
+                if (cls.super !== undefined && cls.super.length > 0) {
+                    let superId = "cls" + MD5(cls.super)
+                    this.addNode(cls.super, superId)
+                    this.link(nodeId, superId, "arrowhead=empty")
+                }
+            }
+        }
 
         this.end()
+        return this.dot
     }
 }
 

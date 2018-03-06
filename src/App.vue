@@ -3,11 +3,13 @@
         <list-panel 
             :datas="root" 
             @onSelectedChange="selectedChange"
-            @onSelfOnlyChange="onSelfOnlyChange">
+            @onSelfOnlyChange="onSelfOnlyChange"
+            @onIsInheritChange="onIsInheritChange">
         </list-panel>
         <graph-content 
             :current-class="currentClass" 
             :self-only="selfOnly" 
+            :show-inherit-graph="isInheritMode"
             @nodeSelected="onNodeSelected">
         </graph-content>
         <detail-panel 
@@ -35,6 +37,7 @@
                 currentClass: "", // 当前选中的类型
                 selfOnly: true, // 只显示内部方法
                 selectedNode: null, // 当前选中的节点，SVGNode
+                isInheritMode: false, // 默认显示方法调用图模式
             }
         },
         
@@ -63,7 +66,25 @@
                 this.selectedNode = null
             },
 
-            // 选中节点
+            // 类图模式切换
+            onIsInheritChange(inherit) {
+                this.isInheritMode = inherit
+                console.log('模式切换')
+            },
+
+            onOptionChange(option) {
+                if (option.isInheritMode != this.isInheritMode) {
+                    this.isInheritMode = option.isInheritMode
+                }
+                if (option.isSelfOnly != this.isSelfOnly) {
+                    this.isSelfOnly = option.isSelfOnly
+                }
+                if (option.selectedClass != this.currentClass) {
+                    this.currentClass = option.selectedClass
+                }
+            },
+
+            // 选中类型节点
             onNodeSelected(node) {
                 this.selectedNode = node
             },

@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const path = require('path')
 
 module.exports = {
     entry: __dirname + '/src/index.js', 
@@ -29,6 +30,10 @@ module.exports = {
                 use: "vue-loader"
             },
             {
+                test: /\.less$/,
+                use: ["style-loader", "css-loader", "less-loader"],
+            },
+            {
                 test: /\.(png|jpg)$/,
                 use: "url-loader",
             },
@@ -42,7 +47,7 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: ["style-loader", "css-loader"]
-            }
+            },
         ]
     },
 }

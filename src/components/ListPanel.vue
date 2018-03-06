@@ -1,28 +1,43 @@
 <template>
     <div class="panel">
-        <input type="text" v-model="keyword" placeholder="Search...">
-        <label><input type="checkbox" v-model="selfOnly" checked> Intrinsic methods only</label>
-        <div class="list-container">
-            <ul>
-                <li v-for="item in list"
-                    :key = "item.id"
-                    :style="{ paddingLeft: item.padding + 'px' }"
-                    :class="{selected: item.isSelected}"
-                    @click="clickItem(item)"
-                >
-                    <div class="node-content">
-                        {{item.text}}
-                    </div>
-                </li>
-            </ul>
+        <!-- 功能选择区域 -->
+        <div class="mode-area">
+            <div @click="selectCallGraphMode" :class="['mode-button', {'mode-selected': !isInheritMode}]">
+                Call Graph
+            </div>
+            <div @click="selectClassDiagramMode" :class="['mode-button', {'mode-selected': isInheritMode}]">
+                Class Diagram
+            </div>
+        </div>
+        <!-- 类型选择区域 -->
+        <div :class="[isInheritMode ? 'class-area-hidden' : 'class-area']">
+            <div class="input-area">
+                <input type="text" v-model="keyword" placeholder="Search...">
+                <label><input type="checkbox" v-model="selfOnly" checked> Intrinsic methods only</label>
+            </div>
+            <div class="list-container">
+                <ul>
+                    <li v-for="item in list"
+                        :key = "item.id"
+                        :style="{ paddingLeft: item.padding + 'px' }"
+                        :class="{selected: item.isSelected}"
+                        @click="selectItem(item)"
+                    >
+                        <div class="node-content">
+                            {{item.text}}
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </template>
 
 
 <script>
-    // 事件: onSelectedChange(node) 改变当前选中的项目
-    // 事件: onSelfOnlyChange(Bool) 
+    // 事件: onSelectedChange(String) 改变当前选中的类型
+    // 事件: onSelfOnlyChange(Bool) 是否只显示内部方法
+    // 事件: onIsInheritChange(Bool) 是否为类图模式
     export default {
         /*
         节点数据
@@ -45,14 +60,28 @@
                 caseSensitive: false, // 区分大小写
 
                 selectedId: undefined, // 选中项目ID
+                isInheritMode: false, // 是否为类图模式
             }
         },
 
         methods: {
-            clickItem(item) {                
+            // 选择list中的某一项
+            selectItem(item) {                
                 this.$emit("onSelectedChange", item.data)
 
                 this.selectedId = item["id"]
+            },
+
+            // 选择方法调用图模式
+            selectCallGraphMode() {
+                this.isInheritMode = false
+                this.$emit('onIsInheritChange', false)
+            },
+
+            // 选择类图模式
+            selectClassDiagramMode() {
+                this.isInheritMode = true
+                this.$emit('onIsInheritChange', true)
             },
             
             // 深度优先遍历root节点
@@ -111,7 +140,9 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+
+@import '../style/common.less';
 
 * {
     font-family: Menlo, Monaco, 'Courier New', monospace;
@@ -121,21 +152,79 @@
     display: flex;
     flex-direction: column;
 
-    background-color: white;
-    border-right: 1px solid #d6e0e8;
-    overflow: auto;
+    background-color: transparent;
+    overflow-x: hidden;
+    overflow-y: auto;
     width: 300px;
     height: 100%;
     position: fixed;
     left: 0px;
     top: 0px;
+} 
+
+// 功能选择区域
+.mode-area {
+    width: 100%;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: @separator;
+    background: white;
+    z-index: 2;
+}
+
+.mode-button {
+    height: 40px;
+    width: 100%;
+    border-bottom: @separator;
+    border-right: @separator;
+    color: black;
+    background-color: white;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mode-selected {
+    background-color: @li-select-color;
+    color: white;
+}
+
+// class选择区域
+.class-area {
+    border-right: @separator;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    margin-top: 0px;
+    z-index: 1;
+    transition: 0.2s ease-out;
+    flex-grow: 2;
+    position: relative;
+    top: 0px;
+}
+
+.class-area-hidden {
+    .class-area;
+    top: -100%;
+}
+
+// 输入框和选项
+.input-area {
+    border-bottom: 1px solid @separator-color;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
 }
 
 input[type='text'] {
     width: 250px;
     font-size: 16px;
-    align-self: center;
-    margin-top: 70px;
+    margin-top: 40px;
     border-width: 0 0 2px 0;
     border-style: solid;
     border-color: #d7e1ea;
@@ -143,11 +232,6 @@ input[type='text'] {
 
 input[type='text']:focus {
     outline: 0px;
-    align-self: center;
-    margin-top: 70px;
-    border-width: 0 0 2px 0;
-    border-style: solid;
-    border-color: #d7e1ea;
 }
 
 input[type='checkbox'] {
@@ -156,19 +240,23 @@ input[type='checkbox'] {
 }
 
 label {
-    margin-top: 10px;
-    margin-left: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+// 列表区域
+.list-container {
+    overflow: auto;
+    min-width: 300px;
+    flex-grow: 3;
 }
 
 ul {
     list-style: none;
-    overflow: auto;
+    overflow: visible;
     padding: 20px 0 0 0;
-}
-
-.list-container ul {
+    margin-top: 0px;
     display: inline-block;
-    min-width: 300px;
 }
 
 li {
@@ -178,7 +266,7 @@ li {
 }
 
 li:hover {
-    background-color: rgba(66, 204, 146, 0.3);
+    background-color: @li-hover-color;
 }
 
 .node-content {
@@ -186,12 +274,12 @@ li:hover {
 }
 
 .selected {
-    background-color: #42cc92;
+    background-color: @li-select-color;
     color: white;
 }
 
 .selected:hover {
-    background-color: #42cc92;
+    background-color: @li-select-color;
     color: white;
 }
 

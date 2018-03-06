@@ -28,9 +28,12 @@
     } from '../js/SVGHandler'
 
     /* 选中事件: nodeSelected(SVGNode), 未选中任何节点则为null */
-
     export default {
-        props: ["currentClass", "selfOnly"], // 当前指定的类名，只显示内部的方法
+        props: [
+            "currentClass", // 当前指定的类名
+            "selfOnly",     // 只显示内部的方法
+            "showInheritGraph" // 是否显示类图模式
+            ], 
 
         data() {
             return {
@@ -43,14 +46,18 @@
         watch: {
             // 切换文件
             currentClass(clsName) { 
-                console.log('切换文件' + clsName)
                 this.updateContent()
             },
 
             // 显示/隐藏内部方法
             selfOnly(self) {
-                console.log('隐藏内部方法: ' + self)
                 this.updateContent()
+            },
+             
+            showInheritGraph(inherit) {
+                if (inherit) {
+                    this.updateContent()
+                }
             }
         },
 
@@ -95,41 +102,53 @@
             },
 
             // 点击缩小
-
             onScaleDown() {
                 Handler.zoomBy(0.8)
             },
 
-            // 选中节点, SVGNode
+            // 选中节点, SVGNode类型
             selectedNode(node) {
-                this.$emit('nodeSelected', node)
-                this.isNodeSelected = node != null
+                if (!this.showInheritGraph) {
+                    this.$emit('nodeSelected', node)
+                    this.isNodeSelected = node != null
+                }
             },
 
             // 更新数据
             updateContent() {
-                // 获取类型id
-                let cls = Global.getClassForName(this.currentClass)
+                this.$emit('nodeSelected', null) // 收起右侧面板
 
-                if (cls !== undefined) {
-                    let clsId = cls.id
-                    // 生成并显示SVG
-                    this.graph = SVGGenerator.generateCallGraphForClass(clsId, {
-                        selfOnly: this.selfOnly,
-                    })
+                if (this.showInheritGraph) { // 类图模式
+                    this.graph = SVGGenerator.genereateInheritGraph()
                     setTimeout(() => {
                         // 更新SVG事件
-                        Handler.update(this.$el, clsId)
+                        Handler.update(this.$el)
                     }, 0);
-                } else {
-                    throw "未找到类型:" + this.currentClass + " !!, 数据有误" 
+                } else { // 方法调用图模式
+                    // 获取类型id
+                    let cls = Global.getClassForName(this.currentClass)
+
+                    if (cls !== undefined) {
+                        let clsId = cls.id
+                        // 生成并显示SVG
+                        this.graph = SVGGenerator.generateCallGraphForClass(clsId, {
+                            selfOnly: this.selfOnly,
+                        })
+                        setTimeout(() => {
+                            // 更新SVG事件
+                            Handler.update(this.$el, clsId)
+                        }, 0);
+                    } else {
+                        throw "未找到类型:" + this.currentClass + " !!, 数据有误" 
+                    }
                 }
             },
         }
     }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+
 .graph-content {
     margin-left: 300px;
     padding-right: 0px;
@@ -153,26 +172,25 @@ div {
     height: 100%;
 }
 
-.scale-up {
+.scale-buttons {
     position: fixed;
     border-radius: 2px;
-    right: 20px;
-    bottom: 85px;
     width: 40px;
     height: 36px;
-    background: url(../img/scale_up.png) no-repeat center;
-    background-color: rgba(0,0,0,0.6);
+}
+
+.scale-up {
+    .scale-buttons;
+    right: 20px;
+    bottom: 85px;
+    background: url(../img/scale_up.png) no-repeat center rgba(0,0,0,0.6);
 }
 
 .scale-down {
-    position: fixed;
-    border-radius: 2px;
+    .scale-buttons;
     right: 20px;
     bottom: 40px;
-    width: 40px;
-    height: 36px;
-    background: url(../img/scale_down.png) no-repeat center;
-    background-color: rgba(0,0,0,0.6);
+    background: url(../img/scale_down.png) no-repeat center rgba(0,0,0,0.6);
 }
 
 .button-right-padding {

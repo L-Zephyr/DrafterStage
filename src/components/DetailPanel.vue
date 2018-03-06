@@ -153,14 +153,16 @@ export default {
     
 </script>
 
-<style scoped>
+<style scoped lang="less">
+
+@import '../style/common.less';
 
 * {
     font-family: Menlo, Monaco, 'Courier New', monospace;
 }
 
 .detail-panel-hidden {
-    border-left: 1px solid #d6e0e8;
+    border-left: 1px solid @separator-color;
     background-color: white;
     overflow-y: auto;
     width: 300px;
@@ -193,16 +195,16 @@ export default {
 }
 
 .unable {
-    color: #bebebe;
+    color: @disable-color;
 }
 
 .class-name {
-    color: #3F6E74;
+    color: @class-name-color;
 }
 
 .param-item {
     border-radius: 5px;
-    background-color: #d6e0e8;
+    background-color: @highlight-color;
     padding: 5px 5px 5px 5px;
     margin-top: 5px;
     margin-bottom: 5px;
@@ -210,7 +212,7 @@ export default {
 }
 
 .param-tag {
-    background-color: #94aec6;
+    background-color: @tag-color;
     border-radius: 5px;
     color: white;
     font-family: Courier, monospace;
@@ -219,8 +221,8 @@ export default {
 }
 
 .invoke-item {
-    background-color: #d6e0e8;
-    border: 1px solid #d6e0e8;
+    background-color: @highlight-color;
+    border: 1px solid @highlight-color;
     padding: 5px 5px 5px 5px;
     margin-top: 5px;
     margin-bottom: 5px;
@@ -230,7 +232,7 @@ export default {
 }
 
 .invoke-item:hover {
-    border: 1px solid #94aec6;
+    border: 1px solid @tag-color;
 }
 
 </style>
