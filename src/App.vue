@@ -14,7 +14,8 @@
         </graph-content>
         <detail-panel 
             :selected-node="selectedNode"
-            :self-only="selfOnly">
+            :self-only="selfOnly"
+            :is-inherit-mode="isInheritMode">
         </detail-panel>
     </div>
 </template>

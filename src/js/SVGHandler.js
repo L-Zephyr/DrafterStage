@@ -169,11 +169,21 @@ class SVGNode extends SVGBase {
     /* 
     id: 节点ID, 带'node_'前缀
     clsId: 该方法所在类型的ID
-    title: 节点的文本
     */
     constructor(id, clsId) {
         super(id)
         this.classId = clsId
+    }
+
+    /* 
+    获取该节点上的文字
+    */
+    title() {
+        let text = elementById(this.id).querySelector('text')
+        if (text) {
+            return text.innerHTML
+        }
+        return null
     }
 
     /* 

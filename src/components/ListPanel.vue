@@ -164,7 +164,7 @@
 
 // 功能选择区域
 .mode-area {
-    width: 100%;
+    // width: 100%;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
@@ -177,9 +177,10 @@
     height: 40px;
     width: 100%;
     border-bottom: @separator;
-    border-right: @separator;
+    border-right: 0;
+    // border-right: @separator;
     color: black;
-    background-color: white;
+    // background-color: white;
     font-weight: bold;
     text-align: center;
     cursor: pointer;

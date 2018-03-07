@@ -4,12 +4,12 @@
             
         </div>
         <button 
-            :class="['scale-up', isNodeSelected ? 'button-right-padding' : '']" 
+            :class="['scale-up']" 
             title="Scale up" 
             @click="onScaleUp">
         </button>
         <button 
-            :class="['scale-down', isNodeSelected ? 'button-right-padding' : '']" 
+            :class="['scale-down']" 
             title="Scale down" 
             @click="onScaleDown">
         </button>
@@ -108,10 +108,8 @@
 
             // 选中节点, SVGNode类型
             selectedNode(node) {
-                if (!this.showInheritGraph) {
-                    this.$emit('nodeSelected', node)
-                    this.isNodeSelected = node != null
-                }
+                this.$emit('nodeSelected', node)
+                this.isNodeSelected = node != null
             },
 
             // 更新数据

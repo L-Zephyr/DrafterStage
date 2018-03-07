@@ -4,27 +4,32 @@
             <li><p class="title">Class</p></li>
             <li><p class="class-name">{{className}}</p></li>
 
-            <li><p class="title">Parameters</p></li>
-            <li v-if="parameters.length == 0" class="unable">None</li>
+            <li><p class="title">{{isInheritMode ? 'Super Class' : 'Parameters'}}</p></li>
+            <li v-if="paramtersOrSuper.length == 0" class="unable">None</li>
             <li 
-                v-for="param in parameters"
-                :key="param.id"
+                v-for="data in paramtersOrSuper"
+                :key="data.id"
             >
-                <div class="param-item">
-                    <span class="param-tag">TYPE:</span> {{param.type}} <br>
-                    <span class="param-tag">NAME:</span> {{param.name}} 
+                <!-- 方法调用图模式 -->
+                <div class="param-item" v-if="!isInheritMode">
+                    <span class="param-tag">TYPE:</span> {{data.type}} <br>
+                    <span class="param-tag">NAME:</span> {{data.name}} 
+                </div>
+                <!-- 类图模式 -->
+                <div :class="['param-item', 'clickable']" @click="clickListItem(data)" v-else>
+                    {{data.name}}
                 </div>
             </li>
 
-            <li><p class="title">Invokes</p></li>
-            <li v-if="invokes.length == 0" class="unable">None</li>
+            <li><p class="title">{{isInheritMode ? 'Protocols' : 'Invokes'}}</p></li>
+            <li v-if="invokesOrProtocols.length == 0" class="unable">None</li>
             <li
-                v-for="invoke in invokes"
-                :key="invoke.id"
-                @click="clickInvokeMethod(invoke)"
+                v-for="data in invokesOrProtocols"
+                :key="data.id"
+                @click="clickListItem(data)"
             >
-                <div class="invoke-item">
-                    {{invoke.name}}
+                <div :class="['invoke-item', 'clickable']">
+                    {{data.name}}
                 </div>
             </li>
         </ul>
@@ -43,19 +48,17 @@ import * as Global from '../js/Global.js'
 import * as Formatter from '../js/Formatter.js'
 import MD5 from 'crypto-js/md5'
 
-/* 
-    事件：invokeMethodSelected(methodId) 选择某个被调用的方法
-*/
 export default {
     props: [
         'selectedNode', // SVGNode，当前选中的节点
         'selfOnly', // 是否只显示内部方法
+        "isInheritMode", // 是否为类图模式
         ],
 
     data () {
         return {
             panelClass: "detail-panel-hidden", 
-            methodData: {}, // 当前选中method节点的数据
+            methodData: {}, // 当前选中节点的数据，method或class
             classId: undefined, // 类型ID
         }
     },
@@ -66,39 +69,25 @@ export default {
             if (!node instanceof SVGNode) {
                 throw TypeError('Request SVGNode type!')
             }
-            let methodId = node.id.substring(5) // 去掉node_前缀
-            let clsId = node.classId // 类型ID
-            this.methodData = Global.getMethod(clsId, methodId)
-            this.classId = clsId
-        },
 
-        // 点击调用的方法
-        clickInvokeMethod(invoke) {
-            Handler.moveToNode(invoke.methodId)
-        },
-    },
-
-    watch: {
-        // 改变选中的节点，node为null表示未选中任何节点
-        selectedNode(node) {
-            if (node != null) {
-                console.log('显示详情面板')
-                this.panelClass = 'detail-panel-show'
-                this.updateDetailContent(node)
-            } else {
-                console.log('隐藏详情面板')
-                this.panelClass = 'detail-panel-hidden'
+            if (!this.isInheritMode) { // 方法调用图模式
+                let clsId = node.classId // 类型ID
+                let methodId = node.id.substring(5) // 去掉node_前缀
+                this.methodData = Global.getMethod(clsId, methodId)
+                this.classId = clsId
+            } else if (node.title()) { // 类图模式
+                let cls = Global.getClassForName(node.title())
+                if (cls) {
+                    this.classId = cls.id
+                } else {
+                    this.panelClass = 'detail-panel-hidden'
+                }
             }
         },
-    },
 
-    computed: {
-        // 当前选中的类型名
-        className() {
-            if (!this.classId || !this.methodData) {
-                return "Unkown"
-            }
-            return Global.getClass(this.classId).name // 类型名
+        // 点击列表中的选项
+        clickListItem(invoke) {
+            Handler.moveToNode(invoke.id)
         },
 
         // 方法参数的数组, Array<{name:, type:}>
@@ -135,19 +124,95 @@ export default {
                     }
                     invokes.push({
                         name: invoke.formatedName,
-                        methodId: 'D' + MD5(invoke.formatedName)
+                        id: 'D' + MD5(invoke.formatedName)
                     })
                 } else {
                     let invokeMethod = Global.getMethod(invoke.classId, invoke.methodId)
                     invokes.push({
                         name: Formatter.formateMethod(invokeMethod),
-                        classId: invoke.classId,
-                        methodId: invoke.methodId,
+                        id: invoke.methodId,
                     })
                 }
             }
             return invokes
+        },
+
+        // 父类
+        superClass() {
+            let cls = Global.getClass(this.classId)
+            if (!cls) {
+                return []
+            }
+
+            let superCls = cls.super
+            if (!superCls || superCls.length == 0) {
+                return []
+            }
+
+            let superId = "cls" + MD5(superCls)
+            return [{
+                name: superCls,
+                id: superId
+            }]
+        },
+
+        // 协议数组
+        protocols() {
+            let cls = Global.getClass(this.classId)
+            if (!cls) {
+                return []
+            }
+
+            let protocols = new Array()
+            for (let key in cls.protocols) {
+                let protocol = cls.protocols[key]
+                protocols.push({
+                    name: protocol.name,
+                    id: "pro" + MD5(protocol.name)
+                })
+            }
+            return protocols
         }
+    },
+
+    watch: {
+        // 改变选中的节点，node为null表示未选中任何节点
+        selectedNode(node) {
+            if (node != null) {
+                console.log('显示详情面板')
+                this.panelClass = 'detail-panel-show'
+                this.updateDetailContent(node)
+            } else {
+                console.log('隐藏详情面板')
+                this.panelClass = 'detail-panel-hidden'
+            }
+        },
+    },
+
+    computed: {
+        // 当前选中的类型名
+        className() {
+            if (!this.classId || !this.methodData) {
+                return "Unkown"
+            }
+            return Global.getClass(this.classId).name // 类型名
+        },
+
+        paramtersOrSuper() {
+            if (this.isInheritMode) {
+                return this.superClass()
+            } else {
+                return this.parameters()
+            }
+        },
+
+        invokesOrProtocols() {
+            if (this.isInheritMode) {
+                return this.protocols()
+            } else {
+                return this.invokes()
+            }
+        },
     }
 }
     
@@ -200,6 +265,7 @@ export default {
 
 .class-name {
     color: @class-name-color;
+    word-wrap: break-word;
 }
 
 .param-item {
@@ -222,16 +288,23 @@ export default {
 
 .invoke-item {
     background-color: @highlight-color;
-    border: 1px solid @highlight-color;
     padding: 5px 5px 5px 5px;
     margin-top: 5px;
     margin-bottom: 5px;
     border-radius: 5px;
     word-break: break-all;
-    cursor: pointer;
 }
 
 .invoke-item:hover {
+    border: 1px solid @tag-color;
+}
+
+.clickable {
+    border: 1px solid @highlight-color;
+    cursor: pointer;
+}
+
+.clickable:hover {
     border: 1px solid @tag-color;
 }
 
