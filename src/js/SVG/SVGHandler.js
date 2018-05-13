@@ -1,17 +1,7 @@
 import PanZoomSvg from 'svg-pan-zoom'
-
-// SVG数据
-let SVGData = {
-    svgRoot: undefined, // SVG的根元素, SVGElement
-    classId: undefined, // 当前类型的ID 
-    nodes: {}, // 保存所有的节点，id : SVGNode
-    lines: {}, // 保存所有连线，id : SVGLine
-}
-
-// 根据id获取g标签
-const elementById = (id) => {
-    return SVGData.svgRoot.querySelector("g[id=" + id + "]")
-}
+import SVGNode from './SVGNode'
+import SVGLine from './SVGLine'
+import { SVGData } from './SVGBase'
 
 // 用来处理SVG相关事件的类型
 class SVGHandler {
@@ -123,150 +113,10 @@ class SVGHandler {
     }
 }
 
-// SVG元素
-class SVGBase {
-    constructor(id) {
-        this.id = id; // ID
-        this.isHighlight = false // 是否被高亮 
-    }
-
-    get highlight() {
-        return this.isHighlight
-    }
-
-    // 设置高亮/普通状态下的颜色
-    set highlight(hl) {
-        this.isHighlight = hl
-        if (hl) {
-            this.strokeColor('blue')
-        } else {
-            this.strokeColor('black')
-        }
-    }
-
-    // 改变节点边框的颜色
-    strokeColor(color) {
-        let element = elementById(this.id)
-        if (!element) {
-            throw '未找到节点:' + this.id
-            return
-        }
-
-        for (let child of element.querySelectorAll('*')) {
-            if (typeof child.setAttribute === 'function') {
-                if (child.tagName == 'text') {
-                    child.setAttribute('fill', color)
-                } else {
-                    child.setAttribute('stroke', color)
-                }
-            }
-        }
-    }
-}
-
-// 表示一个节点
-class SVGNode extends SVGBase {
-    /* 
-    id: 节点ID, 带'node_'前缀
-    clsId: 该方法所在类型的ID
-    */
-    constructor(id, clsId) {
-        super(id)
-        this.classId = clsId
-    }
-
-    /* 
-    获取该节点上的文字
-    */
-    title() {
-        let text = elementById(this.id).querySelector('text')
-        if (text) {
-            return text.innerHTML
-        }
-        return null
-    }
-
-    /* 
-    获取该节点指向其他节点的连线, 返回 Array<SVGLine>
-    */
-    pointToLines() {
-        let id = this.id.split('_')[1];
-        let lines = new Array();
-        let elements = SVGData.svgRoot.querySelectorAll('g[id^=line_' + id + "_]");
-        for (let element of elements) {
-            let line = new SVGLine();
-            let [type, from, to] = element.id.split('_');
-            line.id = element.id;
-            line.from = SVGData.nodes['node_' + from];
-            line.to = SVGData.nodes['node_' + to];
-
-            lines.push(line);
-        }
-
-        return lines;
-    }
-
-    /* 
-    获取该节点指向的其他节点， 返回 Array<SVGNode>
-    */
-    pointToNodes() {
-        let lines = this.pointToLines();
-        let nodes = new Array();
-        for (let line of lines) {
-            nodes.push(line.to);
-        }
-        return nodes;
-    }
-
-    // 其他节点指向该节点的连线
-    pointedLines() {
-        let id = this.id.split('_')[1];
-        let lines = new Array();
-        let elements = SVGData.svgRoot.querySelectorAll('g[id*=_' + id + ']');
-        for (let element of elements) {
-            let line = new SVGLine();
-            let [type, from, to] = element.id.split('_');
-            line.id = element.id;
-            line.from = SVGData.nodes['node_' + from];
-            line.to = SVGData.nodes['node_' + to];
-
-            lines.push(line);
-        }
-
-        return lines;
-    }
-
-    // 指向该节点的其他节点
-    pointedNodes() {
-        let lines = this.pointedLines();
-        let nodes = new Array();
-        for (let line of lines) {
-            nodes.push(line.from);
-        }
-        return nodes;
-    }
-}
-
-// 表示一条连线
-class SVGLine extends SVGBase {
-    /* 
-    id: 连线的ID，带'line_'前缀
-    from: 起始节点，SVGNode
-    to: 结束节点，SVGNode
-    */
-    constructor(id, from, to) {
-        super(id)
-        this.from = from; // SVGNode类型，起始节点
-        this.to = to; // SVGNode类型，结束节点
-    }
-}
-
 // 公用的SVGHandler的单例对象
 const Handler = new SVGHandler()
 
 export {
     SVGHandler,
-    SVGLine,
-    SVGNode,
     Handler
 }

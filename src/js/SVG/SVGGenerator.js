@@ -1,7 +1,8 @@
-import * as Global from './Global.js';
+import * as Global from '../Global.js';
 import Viz from 'viz.js';
-import * as Formatter from './Formatter.js';
+import * as Formatter from '../Formatter.js';
 import MD5 from 'crypto-js/md5'
+import { SVGData } from './SVGBase'
 
 /*
     options: {

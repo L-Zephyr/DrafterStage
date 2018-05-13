@@ -40,14 +40,13 @@
 
 import {
     SVGHandler,
-    SVGLine,
-    SVGNode,
     Handler
-} from '../js/SVGHandler'
+} from '../js/SVG/SVGHandler'
 import * as Global from '../js/Global.js'
 import * as Formatter from '../js/Formatter.js'
 import MD5 from 'crypto-js/md5'
 import { mapState } from 'vuex'
+import SVGNode from '../js/SVG/SVGNode'
 
 export default {
     props: [],

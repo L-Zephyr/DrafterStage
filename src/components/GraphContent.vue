@@ -18,15 +18,14 @@
 </template>
 
 <script>
-    import * as SVGGenerator from '../js/SVGGenerator.js'
+    import * as SVGGenerator from '../js/SVG/SVGGenerator.js'
     import * as Global from '../js/Global.js'
     import { mapMutations, mapState } from 'vuex'
     import {
         SVGHandler,
-        SVGLine,
-        SVGNode,
         Handler
-    } from '../js/SVGHandler'
+    } from '../js/SVG/SVGHandler'
+    import SVGNode from '../js/SVG/SVGNode'
 
     /* 选中事件: nodeSelected(SVGNode), 未选中任何节点则为null */
     export default {
