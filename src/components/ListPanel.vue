@@ -33,11 +33,9 @@
     </div>
 </template>
 
-
 <script>
-    // 事件: onSelectedChange(String) 改变当前选中的类型
-    // 事件: onSelfOnlyChange(Bool) 是否只显示内部方法
-    // 事件: onIsInheritChange(Bool) 是否为类图模式
+    import { mapMutations } from 'vuex'
+
     export default {
         /*
         节点数据
@@ -65,23 +63,33 @@
         },
 
         methods: {
+            ...mapMutations([
+                "SET_CURRENT_CLASS",
+                "SET_SELF_ONLY",
+                "SET_CALL_GRAPH",
+            ]),
+
             // 选择list中的某一项
             selectItem(item) {                
-                this.$emit("onSelectedChange", item.data)
-
+                // this.$emit("onSelectedChange", item.data)
+                this.SET_CURRENT_CLASS(item.text)
                 this.selectedId = item["id"]
             },
 
             // 选择方法调用图模式
             selectCallGraphMode() {
                 this.isInheritMode = false
-                this.$emit('onIsInheritChange', false)
+                // this.$emit('onIsInheritChange', false)
+
+                this.SET_CALL_GRAPH(true)
             },
 
             // 选择类图模式
             selectClassDiagramMode() {
                 this.isInheritMode = true
-                this.$emit('onIsInheritChange', true)
+                // this.$emit('onIsInheritChange', true)
+
+                this.SET_CALL_GRAPH(false)
             },
             
             // 深度优先遍历root节点
@@ -134,7 +142,8 @@
 
         watch: {
             selfOnly(value) {
-                this.$emit('onSelfOnlyChange', value)
+                // this.$emit('onSelfOnlyChange', value)
+                this.SET_SELF_ONLY(value)
             },
         },
     }

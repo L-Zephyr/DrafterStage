@@ -1,0 +1,4 @@
+export const SET_CALL_GRAPH = "SET_CALL_GRAPH"
+export const SET_SELF_ONLY = "SET_SELF_ONLY"
+export const SET_CURRENT_CLASS = "SET_CURRENT_CLASS"
+export const SET_SELECTED = "SET_SELECTED"

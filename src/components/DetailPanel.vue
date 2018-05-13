@@ -4,14 +4,14 @@
             <li><p class="title">Class</p></li>
             <li><p class="class-name">{{className}}</p></li>
 
-            <li><p class="title">{{isInheritMode ? 'Super Class' : 'Parameters'}}</p></li>
+            <li><p class="title">{{callGraphMode ? 'Parameters' : 'Super Class'}}</p></li>
             <li v-if="paramtersOrSuper.length == 0" class="unable">None</li>
             <li 
                 v-for="data in paramtersOrSuper"
                 :key="data.id"
             >
                 <!-- 方法调用图模式 -->
-                <div class="param-item" v-if="!isInheritMode">
+                <div class="param-item" v-if="callGraphMode">
                     <span class="param-tag">TYPE:</span> {{data.type}} <br>
                     <span class="param-tag">NAME:</span> {{data.name}} 
                 </div>
@@ -21,7 +21,7 @@
                 </div>
             </li>
 
-            <li><p class="title">{{isInheritMode ? 'Protocols' : 'Invokes'}}</p></li>
+            <li><p class="title">{{callGraphMode ? 'Invokes':  'Protocols'}}</p></li>
             <li v-if="invokesOrProtocols.length == 0" class="unable">None</li>
             <li
                 v-for="data in invokesOrProtocols"
@@ -47,13 +47,10 @@ import {
 import * as Global from '../js/Global.js'
 import * as Formatter from '../js/Formatter.js'
 import MD5 from 'crypto-js/md5'
+import { mapState } from 'vuex'
 
 export default {
-    props: [
-        'selectedNode', // SVGNode，当前选中的节点
-        'selfOnly', // 是否只显示内部方法
-        "isInheritMode", // 是否为类图模式
-        ],
+    props: [],
 
     data () {
         return {
@@ -63,6 +60,20 @@ export default {
         }
     },
 
+    watch: {
+        // 改变选中的节点，node为null表示未选中任何节点
+        selectedNode(node) {
+            if (node != null) {
+                console.log('显示详情面板')
+                this.panelClass = 'detail-panel-show'
+                this.updateDetailContent(node)
+            } else {
+                console.log('隐藏详情面板')
+                this.panelClass = 'detail-panel-hidden'
+            }
+        },
+    },
+
     methods: {
         // 更新节点详情, SVGNode
         updateDetailContent(node) {
@@ -70,7 +81,7 @@ export default {
                 throw TypeError('Request SVGNode type!')
             }
 
-            if (!this.isInheritMode) { // 方法调用图模式
+            if (this.callGraphMode) { // 方法调用图模式
                 let clsId = node.classId // 类型ID
                 let methodId = node.id.substring(5) // 去掉node_前缀
                 this.methodData = Global.getMethod(clsId, methodId)
@@ -175,21 +186,13 @@ export default {
         }
     },
 
-    watch: {
-        // 改变选中的节点，node为null表示未选中任何节点
-        selectedNode(node) {
-            if (node != null) {
-                console.log('显示详情面板')
-                this.panelClass = 'detail-panel-show'
-                this.updateDetailContent(node)
-            } else {
-                console.log('隐藏详情面板')
-                this.panelClass = 'detail-panel-hidden'
-            }
-        },
-    },
-
     computed: {
+        ...mapState([
+            "selfOnly",
+            "callGraphMode",
+            "selectedNode",
+        ]),
+
         // 当前选中的类型名
         className() {
             if (!this.classId || !this.methodData) {
@@ -199,7 +202,7 @@ export default {
         },
 
         paramtersOrSuper() {
-            if (this.isInheritMode) {
+            if (!this.callGraphMode) {
                 return this.superClass()
             } else {
                 return this.parameters()
@@ -207,7 +210,7 @@ export default {
         },
 
         invokesOrProtocols() {
-            if (this.isInheritMode) {
+            if (!this.callGraphMode) {
                 return this.protocols()
             } else {
                 return this.invokes()

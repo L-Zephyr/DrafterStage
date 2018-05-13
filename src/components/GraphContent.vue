@@ -20,6 +20,7 @@
 <script>
     import * as SVGGenerator from '../js/SVGGenerator.js'
     import * as Global from '../js/Global.js'
+    import { mapMutations, mapState } from 'vuex'
     import {
         SVGHandler,
         SVGLine,
@@ -30,9 +31,9 @@
     /* 选中事件: nodeSelected(SVGNode), 未选中任何节点则为null */
     export default {
         props: [
-            "currentClass", // 当前指定的类名
-            "selfOnly",     // 只显示内部的方法
-            "showInheritGraph" // 是否显示类图模式
+            // "currentClass", // 当前指定的类名
+            // "selfOnly",     // 只显示内部的方法
+            // "showInheritGraph" // 是否显示类图模式
             ], 
 
         data() {
@@ -41,6 +42,14 @@
                 // svg: new SVGHandler(),
                 isNodeSelected: false, // 是否选中节点
             }
+        },
+
+        computed: {
+            ...mapState([
+                "selfOnly",
+                "callGraphMode",
+                "currentClass",
+            ])  
         },
 
         watch: {
@@ -54,11 +63,14 @@
                 this.updateContent()
             },
              
-            showInheritGraph(inherit) {
-                if (inherit) {
+            // 方法调用图/类图切换
+            callGraphMode(callGraph) {
+                if (!callGraph) {
                     this.updateContent()
                 }
-            }
+                // this.updateContent()
+            },
+
         },
 
         created() {
@@ -84,16 +96,20 @@
                 })
 
                 // 发送点击事件
-                this.selectedNode(node)
+                this.selectAtNode(node)
             }
         },
 
         methods: {
+            ...mapMutations([
+                "SET_SELECTED",
+            ]),
+
             // 点击背景
             onClickBackground() {
                 // console.log('点击背景')
                 Handler.deselectedAll()
-                this.selectedNode(null)
+                this.selectAtNode(null)
             },
 
             // 点击放大
@@ -107,22 +123,18 @@
             },
 
             // 选中节点, SVGNode类型
-            selectedNode(node) {
-                this.$emit('nodeSelected', node)
+            selectAtNode(node) {
+                // this.$emit('nodeSelected', node)
+                this.SET_SELECTED(node)
                 this.isNodeSelected = node != null
             },
 
             // 更新数据
             updateContent() {
-                this.$emit('nodeSelected', null) // 收起右侧面板
+                // this.$emit('nodeSelected', null) // 收起右侧面板
+                this.SET_SELECTED(null) // // 收起右侧面板
 
-                if (this.showInheritGraph) { // 类图模式
-                    this.graph = SVGGenerator.genereateInheritGraph()
-                    setTimeout(() => {
-                        // 更新SVG事件
-                        Handler.update(this.$el)
-                    }, 0);
-                } else { // 方法调用图模式
+                if (this.callGraphMode) { // 方法调用图模式
                     // 获取类型id
                     let cls = Global.getClassForName(this.currentClass)
 
@@ -139,6 +151,12 @@
                     } else {
                         throw "未找到类型:" + this.currentClass + " !!, 数据有误" 
                     }
+                } else { // 类图模式
+                    this.graph = SVGGenerator.genereateInheritGraph()
+                    setTimeout(() => {
+                        // 更新SVG事件
+                        Handler.update(this.$el)
+                    }, 0);
                 }
             },
         }

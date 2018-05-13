@@ -4,6 +4,7 @@
   "description": "The front end for drafter",
   "main": "index.js",
   "scripts": {
+    "build": "webpack --config webpack.config.dev.js",
     "build:deploy": "webpack --config webpack.config.deploy.js",
     "server": "webpack-dev-server --open --config webpack.config.dev.js"
   },
@@ -33,6 +34,7 @@
     "crypto-js": "^3.1.9-1",
     "svg-pan-zoom": "^3.5.3",
     "viz.js": "^1.8.0",
-    "vue": "^2.5.13"
+    "vue": "^2.5.13",
+    "vuex": "^3.0.1"
   }
 }
