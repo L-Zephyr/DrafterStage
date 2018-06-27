@@ -265,6 +265,7 @@ ul {
     list-style: none;
     overflow: visible;
     padding: 20px 0 0 0;
+    min-width: 300px;
     margin-top: 0px;
     display: inline-block;
 }

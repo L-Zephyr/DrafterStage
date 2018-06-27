@@ -26,7 +26,7 @@ function rmdir(dir) {
         }
     }
     fs.rmdirSync(dir);
-};
+}
 
 // 该插件在编译完成后将结果文件拷贝到 ~/.drafter 文件夹中
 function DeployResourcePlugin(options) {

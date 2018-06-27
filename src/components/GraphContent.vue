@@ -4,6 +4,11 @@
             
         </div>
         <button 
+            :class="pick"
+            title="pick something you want" 
+            @click="onPick">
+        </button>
+        <button 
             :class="['scale-up']" 
             title="Scale up" 
             @click="onScaleUp">
@@ -121,6 +126,11 @@
                 Handler.zoomBy(0.8)
             },
 
+            // 点击选择
+            onPick() {
+
+            },
+
             // 选中节点, SVGNode类型
             selectAtNode(node) {
                 // this.$emit('nodeSelected', node)
@@ -187,7 +197,7 @@ div {
     height: 100%;
 }
 
-.scale-buttons {
+.side-buttons {
     position: fixed;
     border-radius: 2px;
     width: 40px;
@@ -195,17 +205,24 @@ div {
 }
 
 .scale-up {
-    .scale-buttons;
+    .side-buttons;
     right: 20px;
     bottom: 85px;
     background: url(../img/scale_up.png) no-repeat center rgba(0,0,0,0.6);
 }
 
 .scale-down {
-    .scale-buttons;
+    .side-buttons;
     right: 20px;
     bottom: 40px;
     background: url(../img/scale_down.png) no-repeat center rgba(0,0,0,0.6);
+}
+
+.pick {
+    .side-buttons;
+    right: 20px;
+    bottom: 120px;
+    background: rgba(0,0,0,0.6);
 }
 
 .button-right-padding {

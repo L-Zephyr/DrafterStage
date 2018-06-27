@@ -58,7 +58,7 @@ export default class SVGNode extends SVGBase {
     // 其他节点指向该节点的连线
     pointedLines() {
         let id = this.id.split('_')[1];
-        let lines = new Array();
+        let lines = [];
         let elements = SVGData.svgRoot.querySelectorAll('g[id*=_' + id + ']');
         for (let element of elements) {
             let line = new SVGLine();
@@ -76,7 +76,7 @@ export default class SVGNode extends SVGBase {
     // 指向该节点的其他节点
     pointedNodes() {
         let lines = this.pointedLines();
-        let nodes = new Array();
+        let nodes = [];
         for (let line of lines) {
             nodes.push(line.from);
         }
