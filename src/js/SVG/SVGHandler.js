@@ -1,6 +1,7 @@
 import PanZoomSvg from 'svg-pan-zoom'
 import SVGNode from './SVGNode'
 import SVGLine from './SVGLine'
+import store from '../../store/index'
 import { SVGData } from './SVGBase'
 
 // 用来处理SVG相关事件的类型
@@ -8,7 +9,20 @@ class SVGHandler {
     constructor() {
         this.onClickNode = undefined; // 响应点击事件, 外部传入，回调参数：SVGNode
         this.panZoomSvg = undefined
+        this.pickedNodes = [] // pick模式中选中的节点, [SVGNode]
+
+        store.watch(state => state.isPickMode, (newVal, oldVal) => {
+            if (newVal) {
+                this.enterPickMode()
+            } else {
+                this.leavePickMode()
+            }
+        })
     }
+
+    // ============================
+    // 对外公共接口
+    // ============================
 
     // 更新SVG数据, 传入SVG的根节点和Class的id
     update(root, clsId) {
@@ -30,10 +44,7 @@ class SVGHandler {
             // 为每个节点添加点击事件
             for (let child of svgNode.querySelectorAll('*')) {
                 child.onclick = (event) => {
-                    console.log('点击节点' + node.id)
-                    if (this.onClickNode && typeof this.onClickNode === 'function') {
-                        this.onClickNode(node);
-                    }
+                    this.selectAtNode(node)
                     event.stopPropagation()
                 }
             }
@@ -110,6 +121,50 @@ class SVGHandler {
             scale = 1
         }
         this.panZoomSvg.zoomBy(scale)
+    }
+
+    // ============================
+    // SVG内部交互逻辑
+    // ============================
+
+    // 点击一个节点，SVGNode
+    selectAtNode(node) {
+        if (!node) {
+            console.log('点击的节点不存在')
+            return
+        }
+
+        // 通过一个闭包通知上层
+        if (this.onClickNode && typeof this.onClickNode === 'function') {
+            this.onClickNode(node);
+        }
+
+        if (store.state.isPickMode) { // Pick模式
+            this.pickedNodes.push(node)
+            node.highlight = true
+        } else { // 普通模式
+            // 高亮所选的节点以及相关节点
+            Handler.deselectedAll()
+            node.highlight = true
+            node.pointToLines().map((line) => {
+                line.highlight = true
+            })
+            node.pointToNodes().map((node) => {
+                node.highlight = true
+            })
+        }
+    }
+
+    // 进入选择模式
+    enterPickMode() {
+        console.log("进入pick模式")
+        this.deselectedAll()
+    }
+
+    // 退出pick模式
+    leavePickMode() {
+        console.log("退出pick模式")
+        this.pickedNodes = []
     }
 }
 

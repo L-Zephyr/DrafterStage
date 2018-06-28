@@ -4,9 +4,10 @@
             
         </div>
         <button 
-            :class="pick"
+            class="pick"
             title="pick something you want" 
-            @click="onPick">
+            @click="onPick"
+        >{{ this.isPickMode ? "restore" : "pick" }}
         </button>
         <button 
             :class="['scale-up']" 
@@ -53,6 +54,7 @@
                 "selfOnly",
                 "callGraphMode",
                 "currentClass",
+                "isPickMode"
             ])  
         },
 
@@ -75,6 +77,12 @@
                 // this.updateContent()
             },
 
+            // 进入pick模式后收起右侧详情面板
+            isPickMode(pick) {
+                if (pick) {
+                    this.SET_SELECTED(null)
+                }
+            }
         },
 
         created() {
@@ -82,31 +90,17 @@
 
             // 设置SVG节点的点击事件，node为SVGNode类型
             Handler.onClickNode = (node) => {
-                if (!node) {
-                    console.log('点击的节点不存在')
-                    return
-                }
-                Handler.deselectedAll()
-
-                console.log('点击节点' + node.id)
-
-                // 高亮所选的节点以及相关节点
-                node.highlight = true
-                node.pointToLines().map((line) => {
-                    line.highlight = true
-                })
-                node.pointToNodes().map((node) => {
-                    node.highlight = true
-                })
-
                 // 发送点击事件
-                this.selectAtNode(node)
+                if (!this.isPickMode) {
+                    this.selectAtNode(node)
+                }
             }
         },
 
         methods: {
             ...mapMutations([
                 "SET_SELECTED",
+                "SET_IS_PICK_MODE",
             ]),
 
             // 点击背景
@@ -126,12 +120,12 @@
                 Handler.zoomBy(0.8)
             },
 
-            // 点击选择
+            // 进入/退出pick模式
             onPick() {
-
+                this.SET_IS_PICK_MODE(!this.isPickMode)
             },
 
-            // 选中节点, SVGNode类型
+            // 选中节点，显示/收起右侧视图, SVGNode类型
             selectAtNode(node) {
                 // this.$emit('nodeSelected', node)
                 this.SET_SELECTED(node)
@@ -154,7 +148,7 @@
                             selfOnly: this.selfOnly,
                         })
                         setTimeout(() => {
-                            // 更新SVG事件
+                            // 更新SVG
                             Handler.update(this.$el, clsId)
                         }, 0);
                     } else {
@@ -163,7 +157,7 @@
                 } else { // 类图模式
                     this.graph = SVGGenerator.genereateInheritGraph()
                     setTimeout(() => {
-                        // 更新SVG事件
+                        // 更新SVG
                         Handler.update(this.$el)
                     }, 0);
                 }
@@ -215,13 +209,14 @@ div {
     .side-buttons;
     right: 20px;
     bottom: 40px;
+    color: white;
     background: url(../img/scale_down.png) no-repeat center rgba(0,0,0,0.6);
 }
 
 .pick {
     .side-buttons;
     right: 20px;
-    bottom: 120px;
+    bottom: 140px;
     background: rgba(0,0,0,0.6);
 }
 
