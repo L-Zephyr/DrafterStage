@@ -2,7 +2,8 @@ import {
     SET_CALL_GRAPH,
     SET_SELF_ONLY,
     SET_CURRENT_CLASS,
-    SET_SELECTED
+    SET_SELECTED,
+    SET_IS_PICK_MODE
 } from './mutation-types'
 
 export default {
@@ -20,5 +21,9 @@ export default {
 
     [SET_SELECTED](state, selected) {
         state.selectedNode = selected
+    },
+
+    [SET_IS_PICK_MODE](state, pick) {
+        state.isPickMode = pick
     },
 }
