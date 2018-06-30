@@ -171,8 +171,16 @@ class SVGHandler {
 
         if (store.state.isPickMode) { // Pick模式
             console.log('pick ' + node.id)
-            this.pickedNodes.push(node)
-            node.highlight = true
+            let index = this.pickedNodes.indexOf(node)
+            if (index >= 0) {
+                // 取消选中
+                this.pickedNodes.splice(index, 1)
+                node.highlight = false
+            } else {
+                // 选中节点
+                this.pickedNodes.push(node)
+                node.highlight = true
+            }
         } else { // 普通模式
             // 高亮所选的节点以及相关节点
             Handler.deselectedAll()
@@ -185,14 +193,6 @@ class SVGHandler {
             })
         }
     }
-
-    // 进入选择模式
-    enterPickMode() {
-        console.log("进入pick模式")
-        this.deselectedAll()
-    }
-
-    
 }
 
 // 公用的SVGHandler的单例对象
