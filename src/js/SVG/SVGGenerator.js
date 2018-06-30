@@ -13,9 +13,10 @@ import { SVGData } from './SVGBase'
 */
 // 默认配置
 const DefaultOptions = {
-    selfOnly: true,
+    selfOnly: true, 
     keywords: [],
-    caseSensitive: false
+    caseSensitive: false,
+    specifyIds: [], // 仅显示特定id的节点，为空则表示无限制，在类图模式中表示类型的id，在调用图模式中表示方法id
 }
 
 // 合并选项
@@ -28,10 +29,13 @@ const mergeOptions = (options) => {
     if (opts.selfOnly === undefined) opts.selfOnly = DefaultOptions.selfOnly
     if (opts.keywords === undefined) opts.keywords = DefaultOptions.keywords
     if (opts.caseSensitive === undefined) opts.caseSensitive = DefaultOptions.caseSensitive
+    if (opts.specifyIds === undefined) opts.specifyIds = DefaultOptions.specifyIds
     return opts
 }
 
-// 生成指定类型的方法调用图SVG
+// =====================
+// 1. 生成指定类型的方法调用图SVG
+// =====================
 const generateCallGraphForClass = (clsId, options) => {
     options = mergeOptions(options)
     let cls = Global.getClass(clsId)
@@ -44,8 +48,10 @@ const generateCallGraphForClass = (clsId, options) => {
     }
 }
 
-// 生成类图的SVG
-const genereateInheritGraph = (options) => {
+// =====================
+// 2. 生成类图的SVG
+// =====================
+const genereateClassMap = (options) => {
     options = mergeOptions(options)
     let generator = new InheritGraphGenerator(Global.getAllClass(), options)
     let dot = generator.generate()
@@ -96,8 +102,12 @@ class DotGenerator {
         this.dot += "}"
     }
 
-    // 添加节点，参数为String类型
+    // 添加节点，参数为String类型，节点的ID带有node_前缀
     addNode(text, id) {
+        // 是否在指定节点中
+        if (this.options.specifyIds.length > 0 && this.options.specifyIds.indexOf(id) < 0) {
+            return
+        }
         text = text.replace(new RegExp('>', 'g'), '\\>')
         text = text.replace(new RegExp('<', 'g'), '\\<')
         text = text.replace(new RegExp('->', 'g'), '\\-\\>')
@@ -110,7 +120,7 @@ class DotGenerator {
         this.dot += id + '[id=' + nodeId + ',label="' + text + '"];'
     }
 
-    // 添加连线，参数为method的对象
+    // 添加连线，参数为method的对象，连线的ID带有line_前缀
     link(fromId, toId, style="") {
         // 只能连接存在的节点
         if (!this.hasNode(fromId) || !this.hasNode(toId)) {
@@ -130,26 +140,39 @@ class DotGenerator {
 class CallGraphGenerator extends DotGenerator {
     constructor(methods, options) {
         super(options)
-        this.methods = methods
+        this.methods = methods // [String: JSON], key为方法的id 
     }
 
     generate() {
         this.begin("CallGraph")
-        // 添加节点
+
+        let isUsable = (id) => {
+            if (this.options.specifyIds.length > 0) {
+                if (this.options.specifyIds.indexOf(id) >= 0) {
+                    return true
+                }
+                return false
+            }
+            return true
+        }
+
+        // 添加Class内部的方法节点
         for (let methodKey in this.methods) {
             let method = this.methods[methodKey]
             this.addNode(Formatter.formateMethod(method), method.id)
         }
+        
         // 处理节点的方法调用
         for (let methodKey in this.methods) {
             let method = this.methods[methodKey]
             let fromId = method.id
-            // TODO: 处理其他class中的方法调用
             for (let key in method.invokes) {
                 let invoke = method.invokes[key]
-                if (invoke.methodId && this.hasNode(invoke.methodId)) {
-                    this.link(fromId, invoke.methodId)
-                } else if (invoke.formatedName) {
+                if (invoke.methodId) { // 调用的是一个class内部方法
+                    if (isUsable(invoke.methodId) && this.hasNode(invoke.methodId)) {
+                        this.link(fromId, invoke.methodId)
+                    }
+                } else if (invoke.formatedName) { // 调用的是外部方法
                     // 添加外部方法节点
                     let name = invoke.formatedName
                     let toId = 'D' + MD5(name) // 防止md5后的值以数字开头
@@ -174,11 +197,11 @@ class CallGraphGenerator extends DotGenerator {
     validate(text, nodeId) {
         let valid = true
         // 过滤内部方法
-        if (this.options.selfOnly) {
+        if (valid && this.options.selfOnly) {
             valid = nodeId in this.methods
         }
         // 关键字过滤
-        if (this.options.keywords.length > 0 && valid) {
+        if (valid && this.options.keywords.length > 0) {
             valid = false
             if (this.options.caseSensitive) {
                 text = text.toLowerCase()
@@ -234,5 +257,5 @@ class InheritGraphGenerator extends DotGenerator {
 
 export {
     generateCallGraphForClass,
-    genereateInheritGraph
+    genereateClassMap
 }

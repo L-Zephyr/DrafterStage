@@ -4,10 +4,10 @@
             
         </div>
         <button 
-            class="pick"
+            class="pick-button"
             title="pick something you want" 
             @click="onPick"
-        >{{ this.isPickMode ? "restore" : "pick" }}
+        >{{ this.isPicked ? "restore" : "pick" }}
         </button>
         <button 
             :class="['scale-up']" 
@@ -18,6 +18,10 @@
             :class="['scale-down']" 
             title="Scale down" 
             @click="onScaleDown">
+        </button>
+
+        <button class="confirm-button" @click="onConfirmPick">
+            OK
         </button>
     </div>
     
@@ -46,6 +50,7 @@
                 graph: "<div/>",
                 // svg: new SVGHandler(),
                 isNodeSelected: false, // 是否选中节点
+                isPicked: false, // 是否仅显示了部分节点
             }
         },
 
@@ -55,13 +60,13 @@
                 "callGraphMode",
                 "currentClass",
                 "isPickMode"
-            ])  
+            ]),
         },
 
         watch: {
             // 切换文件
             currentClass(clsName) { 
-                this.updateContent()
+                this.restoreContent()
             },
 
             // 显示/隐藏内部方法
@@ -72,15 +77,17 @@
             // 方法调用图/类图切换
             callGraphMode(callGraph) {
                 if (!callGraph) {
-                    this.updateContent()
+                    this.restoreContent()
                 }
-                // this.updateContent()
             },
 
             // 进入pick模式后收起右侧详情面板
             isPickMode(pick) {
                 if (pick) {
+                    this.isPicked = true
                     this.SET_SELECTED(null)
+                } else {
+                    this.isPicked = Handler.pickedNodes.length > 0
                 }
             }
         },
@@ -103,11 +110,17 @@
                 "SET_IS_PICK_MODE",
             ]),
 
+            // =================
+            // 点击事件
+            // =================
+
             // 点击背景
             onClickBackground() {
                 // console.log('点击背景')
-                Handler.deselectedAll()
-                this.selectAtNode(null)
+                if (!this.isPickMode) {
+                    Handler.deselectedAll()
+                    this.selectAtNode(null)
+                }
             },
 
             // 点击放大
@@ -122,7 +135,17 @@
 
             // 进入/退出pick模式
             onPick() {
-                this.SET_IS_PICK_MODE(!this.isPickMode)
+                if (!this.isPicked) {
+                    this.SET_IS_PICK_MODE(true) // 进入pick模式
+                } else {
+                    this.restoreContent()
+                }
+            },
+
+            // 确认选择的节点
+            onConfirmPick() {
+                this.updateContent()
+                this.SET_IS_PICK_MODE(false)
             },
 
             // 选中节点，显示/收起右侧视图, SVGNode类型
@@ -132,36 +155,38 @@
                 this.isNodeSelected = node != null
             },
 
+            // =================
+            // Methods
+            // =================
+
             // 更新数据
             updateContent() {
                 // this.$emit('nodeSelected', null) // 收起右侧面板
                 this.SET_SELECTED(null) // // 收起右侧面板
 
                 if (this.callGraphMode) { // 方法调用图模式
-                    // 获取类型id
-                    let cls = Global.getClassForName(this.currentClass)
-
-                    if (cls !== undefined) {
-                        let clsId = cls.id
-                        // 生成并显示SVG
-                        this.graph = SVGGenerator.generateCallGraphForClass(clsId, {
-                            selfOnly: this.selfOnly,
-                        })
-                        setTimeout(() => {
-                            // 更新SVG
-                            Handler.update(this.$el, clsId)
-                        }, 0);
-                    } else {
-                        throw "未找到类型:" + this.currentClass + " !!, 数据有误" 
-                    }
-                } else { // 类图模式
-                    this.graph = SVGGenerator.genereateInheritGraph()
+                    // 生成SVG
+                    this.graph = Handler.genereateCallGraph()
+                    // 更新Handler
                     setTimeout(() => {
-                        // 更新SVG
+                        Handler.update(this.$el, this.$store.getters.currentClassId)
+                    }, 0);
+                } else { // 类图模式
+                    this.graph = Handler.genereateClassMap()
+                    // 更新Handler
+                    setTimeout(() => {
                         Handler.update(this.$el)
                     }, 0);
                 }
             },
+
+            // 显示所有的内容
+            restoreContent() {
+                this.SET_IS_PICK_MODE(false)
+                Handler.clearPickedNodes()
+                this.updateContent()
+                this.isPicked = false
+            }
         }
     }
 </script>
@@ -213,9 +238,16 @@ div {
     background: url(../img/scale_down.png) no-repeat center rgba(0,0,0,0.6);
 }
 
-.pick {
+.pick-button {
     .side-buttons;
     right: 20px;
+    bottom: 140px;
+    background: rgba(0,0,0,0.6);
+}
+
+.confirm-button {
+    .side-buttons;
+    right: 100px;
     bottom: 140px;
     background: rgba(0,0,0,0.6);
 }

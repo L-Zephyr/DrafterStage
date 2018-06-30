@@ -2,7 +2,9 @@ import PanZoomSvg from 'svg-pan-zoom'
 import SVGNode from './SVGNode'
 import SVGLine from './SVGLine'
 import store from '../../store/index'
-import { SVGData } from './SVGBase'
+import { SVGData, elementById } from './SVGBase'
+import * as SVGGenerator from './SVGGenerator'
+import * as Global from '../Global'
 
 // 用来处理SVG相关事件的类型
 class SVGHandler {
@@ -13,16 +15,39 @@ class SVGHandler {
 
         store.watch(state => state.isPickMode, (newVal, oldVal) => {
             if (newVal) {
-                this.enterPickMode()
-            } else {
-                this.leavePickMode()
-            }
+                this.pickedNodes = []
+                this.deselectedAll()
+            } 
         })
     }
 
     // ============================
     // 对外公共接口
     // ============================
+
+    // 生成方法调用图，返回SVG
+    genereateCallGraph() {
+        let clsId = store.getters.currentClassId
+        let graph = null
+        if (clsId !== undefined) {
+            // 生成并显示SVG
+            graph = SVGGenerator.generateCallGraphForClass(clsId, {
+                selfOnly: this.selfOnly,
+                specifyIds: this.pickedNodes.map(node => node.id.substring(5))
+            })
+        } else {
+            throw "未找到类型:" + this.currentClass + " !!, 数据有误"
+            return null
+        }
+        return graph
+    }
+
+    // 生成类图，返回SVG
+    genereateClassMap() {
+        return SVGGenerator.genereateClassMap({
+            specifyIds: this.pickedNodes.map(node => node.id.substring(5))
+        })
+    }
 
     // 更新SVG数据, 传入SVG的根节点和Class的id
     update(root, clsId) {
@@ -93,6 +118,9 @@ class SVGHandler {
     id: 节点的ID，不带node_前缀
     */
     moveToNode(id) {
+        if (elementById(id) == null) {
+            return
+        }
         // this.deselectedAll()
         let node = new SVGNode('node_' + id, SVGData.classId)
         // node.isHighlight = true
@@ -100,9 +128,6 @@ class SVGHandler {
             this.onClickNode(node);
         }
 
-        console.log('移动到节点 ' + node)
-
-        // TODO: 将SVG的中心移动到选择的节点上
         let element = elementById('node_' + id)
 
         let leftOffset = element.getBoundingClientRect().left + document.documentElement.scrollLeft
@@ -123,6 +148,11 @@ class SVGHandler {
         this.panZoomSvg.zoomBy(scale)
     }
 
+    // 退出pick模式
+    clearPickedNodes() {
+        this.pickedNodes = []
+    }
+
     // ============================
     // SVG内部交互逻辑
     // ============================
@@ -140,6 +170,7 @@ class SVGHandler {
         }
 
         if (store.state.isPickMode) { // Pick模式
+            console.log('pick ' + node.id)
             this.pickedNodes.push(node)
             node.highlight = true
         } else { // 普通模式
@@ -161,11 +192,7 @@ class SVGHandler {
         this.deselectedAll()
     }
 
-    // 退出pick模式
-    leavePickMode() {
-        console.log("退出pick模式")
-        this.pickedNodes = []
-    }
+    
 }
 
 // 公用的SVGHandler的单例对象
