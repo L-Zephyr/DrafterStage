@@ -71,7 +71,7 @@
 
             // 显示/隐藏内部方法
             selfOnly(self) {
-                this.updateContent()
+                this.restoreContent()
             },
              
             // 方法调用图/类图切换

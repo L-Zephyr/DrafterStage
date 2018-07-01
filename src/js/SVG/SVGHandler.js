@@ -32,7 +32,7 @@ class SVGHandler {
         if (clsId !== undefined) {
             // 生成并显示SVG
             graph = SVGGenerator.generateCallGraphForClass(clsId, {
-                selfOnly: this.selfOnly,
+                selfOnly: store.state.selfOnly,
                 specifyIds: this.pickedNodes.map(node => node.id.substring(5))
             })
         } else {
