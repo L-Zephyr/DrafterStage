@@ -118,17 +118,13 @@ class SVGHandler {
     id: 节点的ID，不带node_前缀
     */
     moveToNode(id) {
-        if (elementById(id) == null) {
+        let element = elementById('node_' + id)
+        if (element == null) {
             return
         }
-        // this.deselectedAll()
-        let node = new SVGNode('node_' + id, SVGData.classId)
-        // node.isHighlight = true
-        if (this.onClickNode && typeof this.onClickNode === 'function') {
-            this.onClickNode(node);
-        }
 
-        let element = elementById('node_' + id)
+        let node = new SVGNode('node_' + id, SVGData.classId)
+        this.selectAtNode(node)
 
         let leftOffset = element.getBoundingClientRect().left + document.documentElement.scrollLeft
         let topOffset = element.getBoundingClientRect().top + document.documentElement.scrollTop
