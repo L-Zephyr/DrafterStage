@@ -1,4 +1,8 @@
-import { SVGBase, SVGData, elementById } from './SVGBase'
+import {
+    SVGBase,
+    SVGData,
+    groupById
+} from './SVGBase'
 
 // 表示一条连线
 export default class SVGLine extends SVGBase {

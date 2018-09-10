@@ -1,5 +1,5 @@
 // 根据id获取g标签
-const elementById = (id) => {
+const groupById = (id) => {
     return SVGData.svgRoot.querySelector("g[id=" + id + "]")
 }
 
@@ -34,7 +34,7 @@ class SVGBase {
 
     // 改变节点边框的颜色
     strokeColor(color) {
-        let element = elementById(this.id)
+        let element = groupById(this.id)
         if (!element) {
             throw '未找到节点:' + this.id
             return
@@ -54,6 +54,6 @@ class SVGBase {
 
 export {
     SVGBase,
-    elementById,
+    groupById,
     SVGData
 }

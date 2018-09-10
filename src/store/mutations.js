@@ -3,7 +3,8 @@ import {
     SET_SELF_ONLY,
     SET_CURRENT_CLASS,
     SET_SELECTED,
-    SET_IS_PICK_MODE
+    SET_IS_PICK_MODE,
+    SET_SHOW_ACCESS_LEVEL
 } from './mutation-types'
 
 export default {
@@ -25,5 +26,9 @@ export default {
 
     [SET_IS_PICK_MODE](state, pick) {
         state.isPickMode = pick
+    },
+
+    [SET_SHOW_ACCESS_LEVEL](state, show) {
+        state.showAccessLevel = show
     },
 }

@@ -11,6 +11,7 @@ const state = {
     currentClass: null, // 当前选中的类型名称（不是id）, String
     selectedNode: null, // 当前选中的节点, SVGNode
     isPickMode: false, // 是否在pick模式
+    showAccessLevel: false, // 是否显示方法的访问等级
 }
 
 const getters = {
@@ -27,7 +28,7 @@ const getters = {
 const store = new Vuex.Store({
     state,
     getters,
-    actions: { },
+    actions: {},
     mutations
 })
 

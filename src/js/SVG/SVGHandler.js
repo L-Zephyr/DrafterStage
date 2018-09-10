@@ -2,9 +2,24 @@ import PanZoomSvg from 'svg-pan-zoom'
 import SVGNode from './SVGNode'
 import SVGLine from './SVGLine'
 import store from '../../store/index'
-import { SVGData, elementById } from './SVGBase'
+import {
+    SVGData,
+    groupById
+} from './SVGBase'
 import * as SVGGenerator from './SVGGenerator'
 import * as Global from '../Global'
+
+// 获取访问等级对应的颜色
+const getAccessLevelColor = (level) => {
+    if (level == 'private' || level == 'fileprivate') {
+        return 'white'
+    } else if (level == 'internal') {
+        return '#ffffca'
+    } else if (level == 'public' || level == 'open') {
+        return '#e2ffe3'
+    }
+    return 'white'
+}
 
 // 用来处理SVG相关事件的类型
 class SVGHandler {
@@ -13,11 +28,17 @@ class SVGHandler {
         this.panZoomSvg = undefined
         this.pickedNodes = [] // pick模式中选中的节点, [SVGNode]
 
+        // 响应pick模式
         store.watch(state => state.isPickMode, (newVal, oldVal) => {
             if (newVal) {
                 this.pickedNodes = []
                 this.deselectedAll()
-            } 
+            }
+        })
+
+        // 显示/隐藏访问等级
+        store.watch(state => state.showAccessLevel, (show, oldVal) => {
+            this.showAccessLevel(show)
         })
     }
 
@@ -90,6 +111,9 @@ class SVGHandler {
             SVGData.svgRoot.setAttribute('height', document.documentElement.clientHeight)
         }
 
+        // 设置访问等级标签
+        this.showAccessLevel(store.state.showAccessLevel)
+
         // 缩放SVG
         this.panZoomSvg = PanZoomSvg(SVGData.svgRoot, {
             fit: false,
@@ -118,7 +142,7 @@ class SVGHandler {
     id: 节点的ID，不带node_前缀
     */
     moveToNode(id) {
-        let element = elementById('node_' + id)
+        let element = groupById('node_' + id)
         if (element == null) {
             return
         }
@@ -128,12 +152,12 @@ class SVGHandler {
 
         let leftOffset = element.getBoundingClientRect().left + document.documentElement.scrollLeft
         let topOffset = element.getBoundingClientRect().top + document.documentElement.scrollTop
-        
+
         let elementWidth = element.getBoundingClientRect().width
         let elementHeight = element.getBoundingClientRect().height
         // 将element滚动到可见范围
-        window.scrollTo(leftOffset - document.documentElement.clientWidth / 2 - elementWidth / 2, 
-                        topOffset - document.documentElement.clientHeight / 2 - elementHeight / 2)
+        window.scrollTo(leftOffset - document.documentElement.clientWidth / 2 - elementWidth / 2,
+            topOffset - document.documentElement.clientHeight / 2 - elementHeight / 2)
     }
 
     // 放大不能超过原始尺寸
@@ -187,6 +211,28 @@ class SVGHandler {
             node.pointToNodes().map((node) => {
                 node.highlight = true
             })
+        }
+    }
+
+    // 显示/隐藏访问控制
+    showAccessLevel(show) {
+        if (show && store.state.callGraphMode) { // 显示方法的访问等级
+            let cls = Global.getClass(store.getters.currentClassId)
+            if (!cls) {
+                return
+            }
+            for (let index in SVGData.nodes) {
+                let node = SVGData.nodes[index]
+                let method = cls.methods[node.id.substring(5)]
+                let accessLevel = method.accessControl
+                if (accessLevel) {
+                    node.addCornerMark(accessLevel, getAccessLevelColor(accessLevel)) // 添加角标
+                }
+            }
+        } else { // 隐藏
+            for (let index in SVGData.nodes) {
+                SVGData.nodes[index].removeCornerMask()
+            }
         }
     }
 }
