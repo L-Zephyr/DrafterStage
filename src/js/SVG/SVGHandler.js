@@ -74,7 +74,7 @@ class SVGHandler {
     update(root, clsId) {
         SVGData.svgRoot = root.querySelector('svg')
         if (!SVGData.svgRoot) {
-            throw 'Not SVG Element found!'
+            console.log('No SVG Element found!')
             return
         }
         SVGData.classId = clsId
@@ -224,6 +224,9 @@ class SVGHandler {
             for (let index in SVGData.nodes) {
                 let node = SVGData.nodes[index]
                 let method = cls.methods[node.id.substring(5)]
+                if (!method) {
+                    continue
+                }
                 let accessLevel = method.accessControl
                 if (accessLevel) {
                     node.addCornerMark(accessLevel, getAccessLevelColor(accessLevel)) // 添加角标

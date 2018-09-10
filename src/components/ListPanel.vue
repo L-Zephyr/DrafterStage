@@ -234,14 +234,16 @@ export default {
     border-bottom: 1px solid @separator-color;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     flex-shrink: 0;
+    margin-left: 20px;
 }
 
 input[type="text"] {
     width: 250px;
     font-size: 16px;
     margin-top: 40px;
+    margin-bottom: 10px;
     border-width: 0 0 2px 0;
     border-style: solid;
     border-color: #d7e1ea;
@@ -257,8 +259,9 @@ input[type="checkbox"] {
 }
 
 label {
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-align: left;
 }
 
 // 列表区域
