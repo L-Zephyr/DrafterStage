@@ -48,9 +48,10 @@ export default class SVGNode extends SVGBase {
         return lines;
     }
 
-    /* 
-    获取该节点指向的其他节点， 返回 Array<SVGNode>
-    */
+    /**
+     * 获取该节点指向的其他节点
+     * @returns {SVGNode[]}
+     */
     pointToNodes() {
         let lines = this.pointToLines();
         let nodes = new Array();

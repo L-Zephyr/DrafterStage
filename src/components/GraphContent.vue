@@ -3,15 +3,10 @@
         <div v-html="graph" id="SvgContainer">
 
         </div>
-        <button :class="isPickMode ? 'confirm-button-show' : 'confirm-button-hide'" @click="onConfirmPick">
-            OK
-        </button>
-        <button class="pick-button" title="pick something you want" @click="onPick">{{ this.isPicked ? "Cancel" : "Pick" }}
-        </button>
-        <button :class="['scale-up']" title="Scale up" @click="onScaleUp">
-        </button>
-        <button :class="['scale-down']" title="Scale down" @click="onScaleDown">
-        </button>
+        <button :class="isPickMode ? 'confirm-button-show' : 'confirm-button-hide'" @click="onConfirmPick">OK</button>
+        <button class="pick-button" title="pick something you want" @click="onPickOrCancel">{{ this.isPicked ? "Cancel" : "Pick" }}</button>
+        <button :class="['scale-up']" title="Scale up" @click="onScaleUp"></button>
+        <button :class="['scale-down']" title="Scale down" @click="onScaleDown"></button>
     </div>
 
 </template>
@@ -123,7 +118,7 @@ export default {
         },
 
         // 进入/退出pick模式
-        onPick() {
+        onPickOrCancel() {
             if (!this.isPicked) {
                 this.SET_IS_PICK_MODE(true) // 进入pick模式
             } else {
@@ -166,6 +161,8 @@ export default {
                     Handler.update(this.$el)
                 }, 0);
             }
+
+            this.isPicked = Handler.pickedNodes.length > 0
         },
 
         // 显示所有的内容

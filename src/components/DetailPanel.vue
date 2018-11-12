@@ -34,11 +34,6 @@
                 <p class="class-name">{{accessControlLevel}}</p>
             </li>
 
-            <!-- 高亮方法子节点 -->
-            <li>
-                <button @click="highlightCallees">Highlight Callees</button>
-            </li>
-
             <!-- 方法调用或协议 -->
             <li>
                 <p class="title">{{callGraphMode ? 'Invokes': 'Protocols'}}</p>
@@ -49,6 +44,11 @@
                     {{data.name}}
                 </div>
             </li>
+
+            <!-- 高亮方法子节点 -->
+            <li><p class="title">Operations</p></li>
+            <li><button @click="pickCallees" class="button">Pick Callees</button></li>
+            <li><button @click="pickDescendants" class="button"> Pick Descendants</button></li>
         </ul>
     </div>
 </template>
@@ -58,7 +58,7 @@ import { SVGHandler, Handler } from "../js/SVG/SVGHandler";
 import * as Global from "../js/Global.js";
 import * as Formatter from "../js/Formatter.js";
 import MD5 from "crypto-js/md5";
-import { mapState } from "vuex";
+import { mapState, mapMutations } from "vuex";
 import SVGNode from "../js/SVG/SVGNode";
 
 export default {
@@ -94,6 +94,10 @@ export default {
     },
 
     methods: {
+        ...mapMutations([
+            'SET_IS_PICK_MODE'
+        ]),
+
         /**
          * 更新节点详情
          * @param {SVGNode} node - 节点类型
@@ -123,8 +127,15 @@ export default {
         /**
          * 高亮选中节点的子节点
          */
-        highlightCallees() {
-            Handler.pickedNodes(this.selectedNode)
+        pickCallees() {
+            Handler.pickCallees(this.selectedNode)
+        },
+        
+        /**
+         * 高亮选中节点以及所有后代节点
+         */
+        pickDescendants() {
+            Handler.pickCallees(this.selectedNode, true)
         },
 
         /**
@@ -377,4 +388,18 @@ export default {
 .clickable:hover {
     border: 1px solid @tag-color;
 }
+
+.button {
+    height: 30px;
+    border: 1px solid lightgray;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    outline: none;
+}
+
+.button:hover {
+    border: 1px solid gray;
+    cursor: pointer;
+}
+
 </style>

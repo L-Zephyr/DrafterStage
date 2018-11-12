@@ -256,9 +256,31 @@ class SVGHandler {
     /**
      * 仅显示该节点及其子节点
      * @param {SVGNode} node 节点
+     * @param {boolean} descendants - 是否包含所有后代节点
      */
-    pickCallees(node) {
+    pickCallees(node, descendants = false) {
+        // 获取所有后代节点
+        let nodeSet = new Set([])
+        let descendantsNodes = (node) => {
+            if (nodeSet.has(node)) { // 防止死循环
+                return []
+            }
+            
+            let children = node.pointToNodes()
+            let descends = [node]
+            nodeSet.add(node)
+            for (let child of children) {
+                descends = descends.concat(descendantsNodes(child))
+            }
+            return descends
+        }
         
+        if (descendants) {
+            this.pickedNodes = descendantsNodes(node) // 递归获取所有后代节点
+        } else {
+            this.pickedNodes = [node].concat(node.pointToNodes()) // 只获取第一层的子节点
+        }
+        this.onUpdateContent()
     }
 }
 
