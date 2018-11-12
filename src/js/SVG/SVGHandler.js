@@ -23,9 +23,17 @@ const getAccessLevelColor = (level) => {
 
 // 用来处理SVG相关事件的类型
 class SVGHandler {
-    constructor() {
-        this.onClickNode = undefined; // 响应点击事件, 外部传入，回调参数：SVGNode
-        this.panZoomSvg = undefined
+    /**
+     * 
+     * @param {function(SVGNode):void} onClickNode - 点击节点回调
+     * @param {function():void} onUpdateContent - 用于Handler主动触发SVG面板的刷新
+     * @param {PanZoomSvg} panZoomSvg - 控制缩放svg
+     * @param {SVGNode[]} pickedNodes - 限制显示指定的node，空表示不做限制
+     */
+    constructor(onClickNode, onUpdateContent, panZoomSvg, pickedNodes) {
+        this.onClickNode = onClickNode; // 响应点击事件, 外部传入，回调参数：SVGNode
+        this.onUpdateContent = onUpdateContent
+        this.panZoomSvg = panZoomSvg
         this.pickedNodes = [] // pick模式中选中的节点, [SVGNode]
 
         // 响应pick模式
@@ -46,7 +54,10 @@ class SVGHandler {
     // 对外公共接口
     // ============================
 
-    // 生成方法调用图，返回SVG
+    /**
+     * 生成方法调用图
+     * @returns {string} - SVG代码
+     */
     genereateCallGraph() {
         let clsId = store.getters.currentClassId
         let graph = null
@@ -177,7 +188,10 @@ class SVGHandler {
     // SVG内部交互逻辑
     // ============================
 
-    // 点击一个节点，SVGNode
+    /**
+     * 点击一个节点, 将该节点以及子节点高亮
+     * @param {SVGNode} node 
+     */
     selectAtNode(node) {
         if (!node) {
             console.log('点击的节点不存在')
@@ -237,6 +251,14 @@ class SVGHandler {
                 SVGData.nodes[index].removeCornerMask()
             }
         }
+    }
+
+    /**
+     * 仅显示该节点及其子节点
+     * @param {SVGNode} node 节点
+     */
+    pickCallees(node) {
+        
     }
 }
 

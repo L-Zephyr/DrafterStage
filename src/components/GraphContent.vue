@@ -28,11 +28,7 @@ import SVGNode from '../js/SVG/SVGNode'
 
 /* 选中事件: nodeSelected(SVGNode), 未选中任何节点则为null */
 export default {
-    props: [
-        // "currentClass", // 当前指定的类名
-        // "selfOnly",     // 只显示内部的方法
-        // "showInheritGraph" // 是否显示类图模式
-    ],
+    props: [],
 
     data() {
         return {
@@ -89,6 +85,11 @@ export default {
             if (!this.isPickMode) {
                 this.selectAtNode(node)
             }
+        }
+
+        // 设置更新回调
+        Handler.onUpdateContent = () => {
+            this.updateContent()
         }
     },
 
@@ -149,7 +150,6 @@ export default {
 
         // 更新数据
         updateContent() {
-            // this.$emit('nodeSelected', null) // 收起右侧面板
             this.SET_SELECTED(null) // // 收起右侧面板
 
             if (this.callGraphMode) { // 方法调用图模式

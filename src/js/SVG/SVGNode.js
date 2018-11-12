@@ -16,9 +16,10 @@ export default class SVGNode extends SVGBase {
         this.classId = clsId
     }
 
-    /* 
-    获取该节点上的文字
-    */
+    /**
+     * 获取该节点上的文字
+     * @returns {string}
+     */
     title() {
         let text = groupById(this.id).querySelector('text')
         if (text) {

@@ -21,7 +21,7 @@
                     <span class="param-tag">NAME:</span> {{data.name}}
                 </div>
                 <!-- 类图模式 -->
-                <div :class="['param-item', 'clickable']" @click="clickListItem(data)" v-else>
+                <div :class="['param-item', 'clickable']" @click="clickListItem(data.id)" v-else>
                     {{data.name}}
                 </div>
             </li>
@@ -34,12 +34,17 @@
                 <p class="class-name">{{accessControlLevel}}</p>
             </li>
 
+            <!-- 高亮方法子节点 -->
+            <li>
+                <button @click="highlightCallees">Highlight Callees</button>
+            </li>
+
             <!-- 方法调用或协议 -->
             <li>
                 <p class="title">{{callGraphMode ? 'Invokes': 'Protocols'}}</p>
             </li>
             <li v-if="invokesOrProtocols.length == 0" class="unable">None</li>
-            <li v-for="data in invokesOrProtocols" :key="data.id" @click="clickListItem(data)">
+            <li v-for="data in invokesOrProtocols" :key="data.id" @click="clickListItem(data.id)">
                 <div :class="['invoke-item', 'clickable']">
                     {{data.name}}
                 </div>
@@ -62,8 +67,15 @@ export default {
     data() {
         return {
             panelClass: "detail-panel-hidden",
-            nodeData: {}, // 当前选中节点的数据，类图模式下为class，调用图模式下为method
-            classId: undefined // 类型ID
+            /**
+             * 当前选中节点的数据，类图模式下为class，调用图模式下为method
+             */
+            nodeData: {}, 
+            /**
+             * 类型Id
+             * @type {string}
+             */
+            classId: undefined
         };
     },
 
@@ -82,7 +94,10 @@ export default {
     },
 
     methods: {
-        // 更新节点详情, SVGNode
+        /**
+         * 更新节点详情
+         * @param {SVGNode} node - 节点类型
+         */
         updateDetailContent(node) {
             if (!node instanceof SVGNode) {
                 throw TypeError("Request SVGNode type!");
@@ -105,12 +120,25 @@ export default {
             }
         },
 
-        // 点击列表中的选项
-        clickListItem(invoke) {
-            Handler.moveToNode(invoke.id);
+        /**
+         * 高亮选中节点的子节点
+         */
+        highlightCallees() {
+            Handler.pickedNodes(this.selectedNode)
         },
 
-        // 方法参数的数组, Array<{name:, type:}>
+        /**
+         * 点击列表中的选项
+         * @param {string} id - 节点的id
+         */
+        clickListItem(id) {
+            Handler.moveToNode(id);
+        },
+
+        /**
+         * 方法参数的数组
+         * @returns { {name: string, type: string}[] }
+         */
         parameters() {
             if (this.nodeData === undefined) {
                 return [];
@@ -129,7 +157,10 @@ export default {
             return params;
         },
 
-        // 调用的方法数组, Array<{name:}>
+        /**
+         * 返回调用的方法数组
+         * @returns { {name: string, id: string}[] }
+         */
         invokes() {
             if (this.nodeData === undefined) {
                 return [];
@@ -160,7 +191,10 @@ export default {
             return invokes;
         },
 
-        // 父类
+        /**
+         * 父类类型
+         * @returns { {name: string, id: string}[] }
+         */
         superClass() {
             let cls = Global.getClass(this.classId);
             if (!cls) {
@@ -181,7 +215,10 @@ export default {
             ];
         },
 
-        // 协议数组
+        /**
+         * 协议数组
+         * @returns { {name: string, id: string}[] }
+         */
         protocols() {
             let cls = Global.getClass(this.classId);
             if (!cls) {
@@ -203,7 +240,9 @@ export default {
     computed: {
         ...mapState(["selfOnly", "callGraphMode", "selectedNode"]),
 
-        // 当前选中的类型名
+        /**
+         * @return {string} - 当前选中的类型名
+         */
         className() {
             if (!this.classId || !this.nodeData) {
                 return "Unkown";
@@ -211,6 +250,10 @@ export default {
             return Global.getClass(this.classId).name; // 类型名
         },
 
+        /**
+         * 根据当前模式返回参数列表或是父类
+         * @returns { {name: string, type: string}[] }
+         */
         paramtersOrSuper() {
             if (!this.callGraphMode) {
                 return this.superClass();
@@ -219,6 +262,10 @@ export default {
             }
         },
 
+        /**
+         * 根据当前模式返回调用方法或是协议
+         * @returns { {name: string, type: string}[] }
+         */
         invokesOrProtocols() {
             if (!this.callGraphMode) {
                 return this.protocols();
@@ -227,6 +274,10 @@ export default {
             }
         },
 
+        /**
+         * 方法的访问等级
+         * @returns {string}
+         */
         accessControlLevel() {
             if (this.nodeData === undefined || this.nodeData.accessControl === undefined) {
                 return null

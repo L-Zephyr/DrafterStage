@@ -19,8 +19,19 @@ const DefaultOptions = {
     specifyIds: [], // 仅显示特定id的节点，为空则表示无限制，在类图模式中表示类型的id，在调用图模式中表示方法id
 }
 
-// 合并选项
-const mergeOptions = (options) => {
+/**
+ * @typedef {object} Options - 选项
+ * @property {boolean} selfOnly
+ * @property {boolean} keywords
+ * @property {boolean} caseSensitive
+ * @property {string[]} specifyIds - 仅显示指定id的节点
+ */
+
+/**
+ * 合并选项
+ * @param {Options} options 选项
+ */
+function mergeOptions(options) {
     let opts = options
     if (opts === undefined) {
         opts = DefaultOptions
@@ -33,10 +44,12 @@ const mergeOptions = (options) => {
     return opts
 }
 
-// =====================
-// 1. 生成指定类型的方法调用图SVG
-// =====================
-const generateCallGraphForClass = (clsId, options) => {
+/**
+ * 生成指定类型的方法调用图SVG
+ * @param {string} clsId - 类型id
+ * @param {Options} options - 选项
+ */
+function generateCallGraphForClass(clsId, options) {
     options = mergeOptions(options)
     let cls = Global.getClass(clsId)
     if (cls !== undefined) {
@@ -48,18 +61,22 @@ const generateCallGraphForClass = (clsId, options) => {
     }
 }
 
-// =====================
-// 2. 生成类图的SVG
-// =====================
-const genereateClassMap = (options) => {
+/**
+ * 生成类图的SVG
+ * @param {Options} options - 选项
+ */
+function genereateClassMap(options) {
     options = mergeOptions(options)
     let generator = new InheritGraphGenerator(Global.getAllClass(), options)
     let dot = generator.generate()
     return generateSVG(dot)
 }
 
-// 根据dot语言生成SVG
-const generateSVG = (dot) => {
+/**
+ * 根据dot语言生成SVG
+ * @param {string} dot dot代码
+ */
+function generateSVG(dot) {
     let html = Viz(dot, {
         format: "svg",
         engine: "dot"
