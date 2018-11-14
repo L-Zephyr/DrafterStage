@@ -28,9 +28,10 @@ export default class SVGNode extends SVGBase {
         return null
     }
 
-    /* 
-    获取该节点指向其他节点的连线, 返回 Array<SVGLine>
-    */
+    /**
+     * 获取该节点指向其他节点的连线
+     * @returns {SVGLine[]}
+     */
     pointToLines() {
         let id = this.id.split('_')[1];
         let lines = new Array();
@@ -61,7 +62,10 @@ export default class SVGNode extends SVGBase {
         return nodes;
     }
 
-    // 其他节点指向该节点的连线
+    /**
+     * 返回其他节点指向该节点的连线
+     * @returns {SVGLine[]}
+     */
     pointedLines() {
         let id = this.id.split('_')[1];
         let lines = [];
@@ -79,7 +83,10 @@ export default class SVGNode extends SVGBase {
         return lines;
     }
 
-    // 指向该节点的其他节点
+    /**
+     * 获取指向该节点的其他节点
+     * @returns {SVGNode[]} 
+     */
     pointedNodes() {
         let lines = this.pointedLines();
         let nodes = [];

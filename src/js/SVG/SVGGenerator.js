@@ -53,6 +53,7 @@ function generateCallGraphForClass(clsId, options) {
     options = mergeOptions(options)
     let cls = Global.getClass(clsId)
     if (cls !== undefined) {
+        console.log(`Class: ${cls.name}, methods count: ${Object.keys(cls.methods).length}`);
         let generator = new CallGraphGenerator(cls.methods, options)
         let dot = generator.generate()
         return generateSVG(dot)

@@ -48,7 +48,9 @@
             <!-- 高亮方法子节点 -->
             <li><p class="title">Operations</p></li>
             <li><button @click="pickCallees" class="button">Pick Callees</button></li>
+            <li><button @click="pickCallers" class="button">Pick Callers</button></li>
             <li><button @click="pickDescendants" class="button"> Pick Descendants</button></li>
+            <li><button @click="pickAncestors" class="button">Pick Ancestors</button></li>
         </ul>
     </div>
 </template>
@@ -125,17 +127,31 @@ export default {
         },
 
         /**
-         * 高亮选中节点的子节点
+         * 筛选当前节点及其子节点
          */
         pickCallees() {
             Handler.pickCallees(this.selectedNode)
         },
         
         /**
-         * 高亮选中节点以及所有后代节点
+         * 筛选当前节点及其所有后代节点
          */
         pickDescendants() {
             Handler.pickCallees(this.selectedNode, true)
+        },
+
+        /**
+         * 筛选当前节点及其上一层父节点
+         */
+        pickCallers() {
+            Handler.pickCallers(this.selectedNode)
+        },
+
+        /**
+         * 筛选当前节点及其所有祖先节点
+         */
+        pickAncestors() {
+            Handler.pickCallers(this.selectedNode, true)
         },
 
         /**

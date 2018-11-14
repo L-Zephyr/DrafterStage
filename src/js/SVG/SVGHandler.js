@@ -256,16 +256,16 @@ class SVGHandler {
     /**
      * 仅显示该节点及其子节点
      * @param {SVGNode} node 节点
-     * @param {boolean} descendants - 是否包含所有后代节点
+     * @param {boolean} recursive - 是否包含所有后代节点
      */
-    pickCallees(node, descendants = false) {
+    pickCallees(node, recursive = false) {
         // 获取所有后代节点
         let nodeSet = new Set([])
         let descendantsNodes = (node) => {
             if (nodeSet.has(node)) { // 防止死循环
                 return []
             }
-            
+
             let children = node.pointToNodes()
             let descends = [node]
             nodeSet.add(node)
@@ -275,14 +275,44 @@ class SVGHandler {
             return descends
         }
         
-        if (descendants) {
+        if (recursive) {
             this.pickedNodes = descendantsNodes(node) // 递归获取所有后代节点
         } else {
             this.pickedNodes = [node].concat(node.pointToNodes()) // 只获取第一层的子节点
         }
         this.onUpdateContent()
     }
+
+    /**
+     * 筛选父节点
+     * @param {SVGNode} node 当前节点
+     * @param {boolean} recursive 是否递归筛选所有祖先节点
+     */
+    pickCallers(node, recursive = false) {
+        let nodeSet = new Set([])
+        let ancestorsNodes = (node) => {
+            if (nodeSet.has(node)) { // 防止死循环
+                return []
+            }
+
+            let parents = node.pointedNodes()
+            let ancestors = [node]
+            nodeSet.add(node)
+            for (let parent of parents) {
+                ancestors = ancestors.concat(ancestorsNodes(parent))
+            }
+            return ancestors
+        }
+
+        if (recursive) {
+            this.pickedNodes = ancestorsNodes(node)
+        } else {
+            this.pickedNodes = [node].concat(node.pointedNodes())
+        }
+        this.onUpdateContent()
+    }
 }
+
 
 // 公用的SVGHandler的单例对象
 const Handler = new SVGHandler()
