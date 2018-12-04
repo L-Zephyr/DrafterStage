@@ -79,6 +79,7 @@ function genereateClassMap(options) {
  */
 function generateSVG(dot) {
     let html = Viz(dot, {
+        totalMemory: 32 * 1024 * 1024,
         format: "svg",
         engine: "dot"
     })

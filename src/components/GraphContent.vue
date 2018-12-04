@@ -149,13 +149,17 @@ export default {
 
             if (this.callGraphMode) { // 方法调用图模式
                 // 生成SVG
+                // let time = (new Date()).getMilliseconds()
                 this.graph = Handler.genereateCallGraph()
+                // console.log('genrate svg ' + ((new Date()).getMilliseconds() - time))
                 // 更新Handler
                 setTimeout(() => {
                     Handler.update(this.$el, this.$store.getters.currentClassId)
                 }, 0);
             } else { // 类图模式
+                // let time = (new Date()).getMilliseconds()
                 this.graph = Handler.genereateClassMap()
+                // console.log('genrate svg ' + ((new Date()).getMilliseconds() - time))
                 // 更新Handler
                 setTimeout(() => {
                     Handler.update(this.$el)

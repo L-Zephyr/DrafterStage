@@ -85,11 +85,9 @@ export default {
         // 改变选中的节点，node为null表示未选中任何节点
         selectedNode(node) {
             if (node != null) {
-                console.log("显示详情面板");
                 this.panelClass = "detail-panel-show";
                 this.updateDetailContent(node);
             } else {
-                console.log("隐藏详情面板");
                 this.panelClass = "detail-panel-hidden";
             }
         }
